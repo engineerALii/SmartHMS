@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart HMS Pro - النظام الذكي المتكامل</title>
+    <title>Smart HMS Pro - نظام الإدارة السحابي</title>
     
-    <!-- الأيقونات والروابط للمنصات المختلفة -->
+    <!-- الأيقونات للمنصات المختلفة -->
     <link rel="icon" type="image/png" href="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
     <link rel="apple-touch-icon" href="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="msapplication-TileImage" content="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     
-    <!-- المكتبات الخارجية -->
+    <!-- المكتبات الأساسية -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -24,268 +23,196 @@
         :root {
             --bg-main: #020617;
             --bg-card: #0f172a;
-            --accent: #3b82f6;
-            --text-main: #f1f5f9;
+            --blue-glow: rgba(59, 130, 246, 0.1);
         }
         body { 
             font-family: 'Cairo', sans-serif; 
             background-color: var(--bg-main); 
-            color: var(--text-main);
+            color: #f1f5f9;
             height: 100dvh;
             overflow: hidden;
-            user-select: none;
         }
         .nav-active { 
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+            background: linear-gradient(135deg, #3b82f6 0%, #1e4ed8 100%); 
             color: white; 
             box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4); 
         }
-        .glass-card { 
-            background: rgba(30, 41, 59, 0.5); 
-            backdrop-filter: blur(16px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
+        .glass { 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
         }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         
-        .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite; }
+        .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 28px; height: 28px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #reader { border: none !important; border-radius: 2rem; overflow: hidden; width: 100% !important; background: #000; display: flex; align-items: center; justify-content: center; }
-        #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
-        #reader__dashboard, #reader__status_span { display: none !important; }
+        #reader { border: none !important; border-radius: 2rem; overflow: hidden; background: #000; }
+        #reader video { object-fit: cover !important; }
 
-        .view-transition { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .view-anim { animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
         #sidebar { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         @media (max-width: 1024px) { #sidebar.closed { transform: translateX(100%); } }
-        
+
         input, select, textarea { 
             background-color: #020617 !important; 
             border: 1px solid #1e293b !important; 
             color: #f1f5f9 !important;
             border-radius: 1rem !important;
-            padding: 1rem !important;
-        }
-        input:focus { border-color: #3b82f6 !important; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
-
-        .stat-card {
-            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
         }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- شاشة تسجيل الدخول -->
-    <div id="adminLoginScreen" class="fixed inset-0 bg-slate-950 z-[110] flex items-center justify-center p-4">
-        <div class="w-full max-w-md glass-card rounded-[3.5rem] p-10 lg:p-14 shadow-2xl text-center space-y-10 border border-white/10">
+    <!-- 1. شاشة تسجيل الدخول -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-950 z-[120] flex items-center justify-center p-4">
+        <div class="w-full max-w-md glass rounded-[3.5rem] p-10 lg:p-14 shadow-2xl text-center space-y-10 border border-white/10">
             <div class="relative inline-block">
                 <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"></div>
                 <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
                      class="w-32 h-32 mx-auto rounded-[2.5rem] shadow-2xl border-2 border-blue-500/30 relative z-10" alt="Logo">
             </div>
-            <div class="space-y-3 relative z-10">
-                <h2 class="text-3xl font-black text-white tracking-tight">النظام المتكامل</h2>
-                <p class="text-slate-500 font-bold text-sm uppercase tracking-widest">Medical Management System</p>
-            </div>
-            <div class="space-y-5 relative z-10">
-                <input type="password" id="adminPassword" 
-                       class="w-full p-6 text-center text-3xl tracking-[0.5em] focus:ring-4 focus:ring-blue-500/20 outline-none transition-all"
-                       placeholder="••••">
-                <button id="loginBtn" onclick="checkAdminAuth()" 
-                        class="w-full py-6 bg-blue-600 text-white font-black rounded-[1.5rem] hover:bg-blue-700 shadow-xl shadow-blue-900/40 transition-all flex items-center justify-center gap-3 text-lg">
-                    <span>دخول النظام</span>
-                    <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
+            <h2 class="text-3xl font-black text-white">تسجيل الدخول</h2>
+            <div class="space-y-5">
+                <input type="password" id="adminPass" class="w-full p-6 text-center text-3xl tracking-[0.5em] outline-none" placeholder="••••">
+                <button onclick="handleLogin()" id="loginBtn" class="w-full py-6 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-xl flex items-center justify-center gap-3">
+                    دخول النظام <i data-lucide="shield-check"></i>
                 </button>
             </div>
-            <p id="authError" class="text-red-400 text-sm font-bold hidden bg-red-500/10 py-4 rounded-2xl border border-red-500/20">⚠️ كلمة المرور المدخلة غير صحيحة</p>
+            <p id="loginError" class="text-red-400 text-sm font-bold hidden bg-red-500/10 py-3 rounded-xl border border-red-500/20">خطأ في كلمة المرور!</p>
         </div>
     </div>
 
-    <!-- شاشة التحميل -->
-    <div id="loadingScreen" class="fixed inset-0 bg-slate-950 z-[100] flex flex-col items-center justify-center transition-all duration-700 hidden">
-        <div class="relative mb-12">
-            <div class="absolute inset-0 bg-blue-500/20 blur-2xl animate-pulse rounded-full"></div>
-            <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
-                 class="w-28 h-28 rounded-3xl shadow-2xl border-2 border-blue-500/40 relative z-10" alt="Logo">
-        </div>
-        <div class="flex flex-col items-center gap-4">
-            <div class="loader"></div>
-            <p id="loadingStatus" class="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] text-center px-8">جارِ مزامنة الخدمات السحابية...</p>
-        </div>
+    <!-- 2. شاشة التحميل -->
+    <div id="syncScreen" class="fixed inset-0 bg-slate-950 z-[110] flex flex-col items-center justify-center hidden">
+        <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
+             class="w-24 h-24 mb-10 rounded-3xl animate-pulse shadow-2xl border-2 border-blue-500/40" alt="Logo">
+        <div class="loader mb-4"></div>
+        <p id="syncText" class="text-slate-500 text-[10px] font-black uppercase tracking-[0.5em]">مزامنة السحابة الآمنة...</p>
     </div>
 
-    <!-- واجهة النظام الرئيسية -->
+    <!-- 3. التطبيق الرئيسي -->
     <div id="mainApp" class="hidden flex flex-col lg:flex-row h-screen overflow-hidden">
         
         <!-- القائمة الجانبية -->
-        <aside id="sidebar" class="fixed lg:relative top-0 right-0 h-full w-80 glass-card border-l border-white/5 flex flex-col z-50 closed lg:translate-x-0 shadow-2xl lg:shadow-none">
+        <aside id="sidebar" class="fixed lg:relative top-0 right-0 h-full w-80 glass border-l border-white/5 flex flex-col z-50 closed lg:translate-x-0">
             <div class="p-10 border-b border-white/5 flex justify-between items-center">
                 <div class="flex items-center gap-4">
                     <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
-                         class="w-12 h-12 rounded-2xl shadow-xl border border-white/10" alt="Icon">
-                    <div class="leading-none">
-                        <span class="font-black text-2xl text-white tracking-tighter block">Smart<span class="text-blue-500">HMS</span></span>
-                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Version 2.5</span>
-                    </div>
+                         class="w-12 h-12 rounded-2xl border border-white/10" alt="Icon">
+                    <span class="font-black text-2xl text-white tracking-tighter">Smart<span class="text-blue-500">HMS</span></span>
                 </div>
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-400 hover:text-white transition-colors">
-                    <i data-lucide="chevron-right" class="w-7 h-7"></i>
-                </button>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-400"><i data-lucide="x"></i></button>
             </div>
 
             <nav class="flex-1 p-6 space-y-3 overflow-y-auto custom-scrollbar">
-                <div class="px-4 py-2 text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-50">Overview</div>
-                <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-5 px-5 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all nav-active">
-                    <i data-lucide="grid-3x3" class="w-5 h-5"></i>
-                    <span class="font-black text-sm uppercase">لوحة التحكم</span>
+                <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all nav-active">
+                    <i data-lucide="grid"></i> <span class="font-bold">لوحة التحكم</span>
                 </button>
-                
-                <div class="px-4 py-2 mt-8 text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-50">Management</div>
-                <button onclick="switchView('patients')" id="nav-patients" class="nav-btn w-full flex items-center gap-5 px-5 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
-                    <i data-lucide="folder-kanban" class="w-5 h-5"></i>
-                    <span class="font-black text-sm uppercase">قائمة المرضى</span>
+                <button onclick="switchView('patients')" id="nav-patients" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
+                    <i data-lucide="users"></i> <span class="font-bold">قائمة المرضى</span>
                 </button>
-                <button onclick="switchView('add')" id="nav-add" class="nav-btn w-full flex items-center gap-5 px-5 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
-                    <i data-lucide="user-plus-2" class="w-5 h-5"></i>
-                    <span class="font-black text-sm uppercase">إضافة مريض</span>
+                <button onclick="switchView('add')" id="nav-add" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
+                    <i data-lucide="user-plus"></i> <span class="font-bold">إضافة مريض</span>
                 </button>
-                <button onclick="switchView('scan')" id="nav-scan" class="nav-btn w-full flex items-center gap-5 px-5 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
-                    <i data-lucide="scan-barcode" class="w-5 h-5"></i>
-                    <span class="font-black text-sm uppercase">مسح الباركود</span>
+                <button onclick="switchView('scan')" id="nav-scan" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
+                    <i data-lucide="qr-code"></i> <span class="font-bold">مسح الباركود</span>
                 </button>
             </nav>
 
             <div class="p-8 border-t border-white/5 bg-slate-950/40">
-                <div class="flex items-center gap-5">
-                    <div class="w-14 h-14 glass-card rounded-[1.2rem] flex items-center justify-center text-blue-500 font-black border border-blue-500/20 shadow-lg shadow-blue-500/10">ADM</div>
-                    <div class="flex-1 overflow-hidden">
-                        <p class="text-sm font-black text-white truncate">المدير العام</p>
-                        <p class="text-[10px] text-green-500 font-black uppercase tracking-widest flex items-center gap-2">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                            </span> 
-                            Online Now
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-blue-500 font-bold border border-blue-500/20">ADM</div>
+                    <div class="flex-1">
+                        <p class="text-sm font-black text-white">المدير العام</p>
+                        <p class="text-[9px] text-green-500 font-black uppercase tracking-widest flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> متصل الآن
                         </p>
                     </div>
                 </div>
             </div>
         </aside>
 
-        <!-- منطقة العرض الرئيسية -->
+        <!-- منطقة المحتوى -->
         <main class="flex-1 h-full overflow-y-auto custom-scrollbar relative flex flex-col">
-            
-            <header class="p-6 lg:p-10 flex justify-between items-center sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
+            <header class="p-6 lg:p-10 flex justify-between items-center sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-white/5">
                 <div class="flex items-center gap-5">
-                    <button onclick="toggleSidebar()" class="lg:hidden p-4 glass-card rounded-2xl text-white shadow-xl">
-                        <i data-lucide="menu-scale" class="w-6 h-6"></i>
-                    </button>
-                    <div id="viewTitle">
-                        <h2 class="text-2xl lg:text-4xl font-black text-white tracking-tighter">لوحة التحكم</h2>
-                    </div>
+                    <button onclick="toggleSidebar()" class="lg:hidden p-4 glass rounded-2xl text-white"><i data-lucide="menu"></i></button>
+                    <h2 id="viewTitle" class="text-2xl lg:text-3xl font-black text-white tracking-tighter">لوحة التحكم</h2>
                 </div>
-                
-                <div class="flex items-center gap-5">
-                    <button onclick="toggleNotifications()" id="notifBell" class="w-12 h-12 lg:w-16 lg:h-16 glass-card rounded-3xl flex items-center justify-center text-slate-400 hover:text-blue-500 transition-all relative group">
-                        <i data-lucide="bell-dot" class="w-6 h-6 group-hover:rotate-12 transition-transform"></i>
-                        <span id="notifBadge" class="absolute top-4 right-4 w-3.5 h-3.5 bg-blue-600 rounded-full border-4 border-slate-950 shadow-lg shadow-blue-600/50"></span>
-                    </button>
-                    
-                    <!-- التنبيهات -->
-                    <div id="notificationsDropdown" class="absolute top-full left-0 mt-6 w-80 glass-card rounded-[2.5rem] shadow-2xl p-6 hidden animate-in slide-in-from-top-10 duration-500 z-50">
-                        <div class="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-                            <span class="font-black text-sm text-white uppercase tracking-widest">Notifications</span>
-                        </div>
-                        <div class="space-y-4" id="notif-container">
-                            <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex gap-4">
-                                <div class="bg-blue-600/20 text-blue-400 p-2.5 rounded-xl h-fit shadow-inner"><i data-lucide="check-check" class="w-4 h-4"></i></div>
-                                <div>
-                                    <p class="text-[11px] font-black text-slate-200 leading-snug">تم استعادة المزامنة السحابية بنجاح</p>
-                                    <p class="text-[9px] text-slate-500 mt-1 font-black uppercase tracking-tighter">System Alert • Just now</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <button class="w-12 h-12 glass rounded-2xl flex items-center justify-center text-slate-400 hover:text-blue-500 transition-all">
+                    <i data-lucide="bell"></i>
+                </button>
             </header>
 
-            <div class="p-6 lg:p-12 flex-1">
+            <div class="p-6 lg:p-12 flex-1 space-y-10">
                 
-                <div id="view-dashboard" class="view-content view-transition space-y-10">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-                        <div class="stat-card p-10 rounded-[3rem] border border-white/5 flex flex-col gap-6 shadow-2xl relative overflow-hidden group">
-                            <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-blue-600/10 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
-                            <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/40"><i data-lucide="users-2" class="w-8 h-8"></i></div>
+                <!-- Dashboard -->
+                <div id="view-dashboard" class="view-content view-anim space-y-10">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group">
+                            <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="users" class="w-8 h-8"></i></div>
                             <div>
-                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Patients</p>
-                                <p class="text-5xl font-black text-white" id="count-patients">0</p>
+                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">إجمالي المرضى</p>
+                                <p class="text-4xl font-black text-white" id="count-patients">0</p>
                             </div>
                         </div>
-                        <div class="stat-card p-10 rounded-[3rem] border border-white/5 flex flex-col gap-6 shadow-2xl relative overflow-hidden group">
-                            <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-green-600/10 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
-                            <div class="w-16 h-16 bg-green-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-green-900/40"><i data-lucide="stethoscope" class="w-8 h-8"></i></div>
+                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group">
+                            <div class="w-16 h-16 bg-green-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="activity" class="w-8 h-8"></i></div>
                             <div>
-                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Today Visits</p>
-                                <p class="text-5xl font-black text-white" id="count-visits">0</p>
+                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">زيارات اليوم</p>
+                                <p class="text-4xl font-black text-white" id="count-visits">0</p>
                             </div>
                         </div>
-                        <div class="stat-card p-10 rounded-[3rem] border border-white/5 flex flex-col gap-6 shadow-2xl relative overflow-hidden group sm:col-span-2 lg:col-span-1">
-                            <div class="absolute -bottom-4 -left-4 w-24 h-24 bg-red-600/10 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
-                            <div class="w-16 h-16 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/40"><i data-lucide="zap" class="w-8 h-8"></i></div>
+                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group sm:col-span-2 lg:col-span-1">
+                            <div class="w-16 h-16 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="alert-circle" class="w-8 h-8"></i></div>
                             <div>
-                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Emergency Cases</p>
-                                <p class="text-5xl font-black text-white" id="count-emergency">0</p>
+                                <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">حالات طارئة</p>
+                                <p class="text-4xl font-black text-white" id="count-emergency">0</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="glass-card rounded-[3.5rem] overflow-hidden shadow-2xl border border-white/5">
-                        <div class="p-10 border-b border-white/5 flex justify-between items-center bg-white/5">
-                            <div class="flex items-center gap-5">
-                                <div class="w-2.5 h-10 bg-blue-600 rounded-full"></div>
-                                <h3 class="font-black text-2xl text-white tracking-tight">آخر السجلات الطبية</h3>
-                            </div>
-                            <button onclick="switchView('patients')" class="text-blue-500 text-xs font-black hover:text-blue-400 flex items-center gap-3 transition-all">
-                                VIEW ALL <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                            </button>
+                    <div class="glass rounded-[3rem] overflow-hidden">
+                        <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
+                            <h3 class="font-black text-xl text-white">أحدث السجلات</h3>
                         </div>
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-right whitespace-nowrap">
-                                <thead class="bg-slate-950 text-slate-500 text-[9px] font-black uppercase tracking-[0.2em]">
+                                <thead class="bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest">
                                     <tr>
-                                        <th class="px-10 py-6">Patient Identity</th>
-                                        <th class="px-10 py-6 text-center">Type</th>
-                                        <th class="px-10 py-6 text-center">Date</th>
-                                        <th class="px-10 py-6 text-center">Action</th>
+                                        <th class="px-8 py-5">اسم المريض</th>
+                                        <th class="px-8 py-5 text-center">الفصيلة</th>
+                                        <th class="px-8 py-5 text-center">التاريخ</th>
+                                        <th class="px-8 py-5 text-center">الإجراء</th>
                                     </tr>
                                 </thead>
-                                <tbody id="latest-table-body" class="divide-y divide-white/5 font-bold">
-                                    <tr><td colspan="4" class="p-24 text-center text-slate-700 font-black tracking-[0.5em] animate-pulse">SYNCHRONIZING...</td></tr>
-                                </tbody>
+                                <tbody id="latest-table-body" class="divide-y divide-white/5 font-bold"></tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
-                <div id="view-patients" class="view-content view-transition hidden space-y-10">
-                    <div class="glass-card p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                <!-- Patient List -->
+                <div id="view-patients" class="view-content view-anim hidden space-y-10">
+                    <div class="glass p-6 rounded-[2rem] border border-white/5">
                         <div class="relative w-full">
-                            <i data-lucide="search-code" class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 w-6 h-6"></i>
-                            <input type="text" id="patientSearch" placeholder="بحث باسم المريض، الجوال، أو الرقم التسلسلي..." class="w-full pr-16 pl-8 py-6 rounded-[2rem] outline-none transition-all text-base font-black shadow-inner">
+                            <i data-lucide="search" class="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                            <input type="text" id="patientSearch" placeholder="بحث باسم المريض أو الجوال..." class="w-full pr-14 pl-6 py-5 rounded-[1.5rem] outline-none font-black shadow-inner">
                         </div>
                     </div>
-                    
-                    <div class="glass-card rounded-[3.5rem] overflow-hidden shadow-2xl border border-white/5">
+                    <div class="glass rounded-[3rem] overflow-hidden">
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-right whitespace-nowrap font-bold">
-                                <thead class="bg-slate-950 text-slate-500 text-[9px] font-black uppercase tracking-[0.2em]">
+                                <thead class="bg-white/5 text-slate-500 text-[10px] font-black uppercase">
                                     <tr>
-                                        <th class="px-10 py-7">Medical Record</th>
-                                        <th class="px-10 py-7">Phone Number</th>
-                                        <th class="px-10 py-7 text-center">Age</th>
-                                        <th class="px-10 py-7 text-center">Explore</th>
+                                        <th class="px-8 py-6">البيانات الأساسية</th>
+                                        <th class="px-8 py-6">رقم الجوال</th>
+                                        <th class="px-8 py-6 text-center">العمر</th>
+                                        <th class="px-8 py-6 text-center">الإجراء</th>
                                     </tr>
                                 </thead>
                                 <tbody id="full-list-body" class="divide-y divide-white/5"></tbody>
@@ -294,128 +221,106 @@
                     </div>
                 </div>
 
-                <div id="view-add" class="view-content view-transition hidden">
-                    <div class="max-w-5xl mx-auto glass-card p-10 lg:p-20 rounded-[4.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
-                        <div class="absolute -top-32 -left-32 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
-                        <div class="relative z-10">
-                            <div class="text-center mb-16">
-                                <div class="w-24 h-24 bg-blue-600/20 text-blue-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl border border-blue-500/20 shadow-blue-500/10">
-                                    <i data-lucide="clipboard-list" class="w-12 h-12"></i>
-                                </div>
-                                <h3 class="text-4xl font-black text-white tracking-tight">تسجيل عضوية جديدة</h3>
-                                <p class="text-slate-500 text-sm mt-3 font-bold uppercase tracking-[0.2em]">Medical Membership Registration</p>
+                <!-- Add Patient -->
+                <div id="view-add" class="view-content view-anim hidden">
+                    <div class="max-w-4xl mx-auto glass p-10 lg:p-16 rounded-[4rem] shadow-2xl">
+                        <h3 class="text-3xl font-black text-center mb-12">تسجيل مريض جديد</h3>
+                        <form id="addPatientForm" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">الاسم الرباعي</label>
+                                <input type="text" name="name" required class="w-full p-5 text-base font-bold" placeholder="أدخل اسم المريض">
                             </div>
-                            <form id="addPatientForm" class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12">
-                                <div class="space-y-3">
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mr-3">Full Legal Name</label>
-                                    <input type="text" name="name" required class="w-full p-6 text-base font-black" placeholder="الاسم الرباعي للمريض">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">العمر</label>
+                                    <input type="number" name="age" required class="w-full p-5 text-base font-bold" placeholder="00">
                                 </div>
-                                <div class="grid grid-cols-2 gap-6">
-                                    <div class="space-y-3">
-                                        <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Age</label>
-                                        <input type="number" name="age" required class="w-full p-6 text-base font-black" placeholder="00">
-                                    </div>
-                                    <div class="space-y-3">
-                                        <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Gender</label>
-                                        <select name="gender" class="w-full p-6 text-base font-black">
-                                            <option value="ذكر">ذكر ♂</option>
-                                            <option value="أنثى">أنثى ♀</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="space-y-3">
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Primary Phone</label>
-                                    <input type="tel" name="phone" required class="w-full p-6 text-base font-black" placeholder="05XXXXXXXX">
-                                </div>
-                                <div class="space-y-3">
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Blood Category</label>
-                                    <select name="bloodType" class="w-full p-6 text-base font-black uppercase">
-                                        <option value="A+">A+</option><option value="O+">O+</option><option value="B+">B+</option><option value="AB+">AB+</option>
-                                        <option value="A-">A-</option><option value="O-">O-</option><option value="B-">B-</option><option value="AB-">AB-</option>
+                                <div class="space-y-2">
+                                    <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">الجنس</label>
+                                    <select name="gender" class="w-full p-5 font-bold">
+                                        <option value="ذكر">ذكر</option>
+                                        <option value="أنثى">أنثى</option>
                                     </select>
                                 </div>
-                                <div class="md:col-span-2 space-y-3">
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Clinical Remarks</label>
-                                    <textarea name="notes" rows="4" class="w-full p-6 text-base font-black" placeholder="حساسية الأدوية، الأمراض المزمنة، تاريخ العمليات..."></textarea>
-                                </div>
-                                <div class="md:col-span-2 pt-10">
-                                    <button type="submit" id="saveBtn" class="w-full py-7 bg-blue-600 text-white font-black rounded-[2rem] hover:bg-blue-700 shadow-2xl shadow-blue-900/30 transition-all flex items-center justify-center gap-4 text-2xl active:scale-95">
-                                        <i data-lucide="shield-plus" class="w-7 h-7"></i>
-                                        <span>توليد السجل الطبي</span>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">رقم الجوال</label>
+                                <input type="tel" name="phone" required class="w-full p-5 text-base font-bold" placeholder="05XXXXXXXX">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">فصيلة الدم</label>
+                                <select name="bloodType" class="w-full p-5 font-bold">
+                                    <option value="A+">A+</option><option value="O+">O+</option><option value="B+">B+</option><option value="AB+">AB+</option>
+                                    <option value="A-">A-</option><option value="O-">O-</option><option value="B-">B-</option><option value="AB-">AB-</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 space-y-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">ملاحظات طبية</label>
+                                <textarea name="notes" rows="3" class="w-full p-5 text-base font-bold" placeholder="حساسية، أمراض مزمنة..."></textarea>
+                            </div>
+                            <button type="submit" id="saveBtn" class="md:col-span-2 py-6 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-2xl transition-all">حفظ وتوليد الباركود</button>
+                        </form>
                     </div>
                 </div>
 
-                <div id="view-scan" class="view-content view-transition hidden">
-                    <div class="max-w-2xl mx-auto text-center space-y-12">
-                        <div class="glass-card p-10 lg:p-16 rounded-[4.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                            <div class="absolute -top-12 -right-12 w-64 h-64 bg-blue-600/10 rounded-full blur-[100px]"></div>
-                            <div class="w-24 h-24 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-blue-900/30">
-                                <i data-lucide="scan-line" class="w-12 h-12"></i>
-                            </div>
-                            <h3 class="text-4xl font-black text-white tracking-tight">التعرف الفوري</h3>
-                            <p class="text-slate-500 text-sm mt-4 mb-12 font-bold uppercase tracking-[0.3em] leading-relaxed">Point the camera at the patient ID card or wristband</p>
-                            
-                            <div class="relative rounded-[3.5rem] overflow-hidden border-[15px] border-slate-900 aspect-square shadow-2xl bg-black group max-w-[420px] mx-auto">
-                                <div id="reader" class="w-full h-full"></div>
-                                <div class="absolute inset-0 border-2 border-blue-500/40 rounded-[2.5rem] pointer-events-none animate-pulse"></div>
-                                <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-scan-line"></div>
-                            </div>
-                            
-                            <div id="scanStatus" class="mt-12 text-[11px] font-black text-blue-500 uppercase tracking-[0.5em] animate-pulse">Waiting for camera...</div>
+                <!-- QR Scan -->
+                <div id="view-scan" class="view-content view-anim hidden">
+                    <div class="max-w-xl mx-auto glass p-10 lg:p-14 rounded-[4rem] text-center space-y-10">
+                        <div class="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner"><i data-lucide="scan" class="w-10 h-10"></i></div>
+                        <h3 class="text-3xl font-black">ماسح الهوية الطبية</h3>
+                        <p class="text-slate-500 text-sm font-bold uppercase tracking-widest leading-relaxed">وجه الكاميرا نحو كود سوار المريض للتعرف الفوري</p>
+                        <div class="relative rounded-[2.5rem] overflow-hidden border-[12px] border-slate-900 aspect-square shadow-2xl bg-black">
+                            <div id="reader" class="h-full"></div>
                         </div>
+                        <div id="scanStatus" class="text-[11px] font-black text-blue-500 uppercase tracking-widest animate-pulse">Scanning Engine Ready...</div>
                     </div>
                 </div>
 
-                <div id="view-details" class="view-content view-transition hidden">
-                    <div id="details-container" class="space-y-10 pb-16"></div>
+                <!-- Patient Details -->
+                <div id="view-details" class="view-content view-anim hidden">
+                    <div id="details-container" class="space-y-10"></div>
                 </div>
 
             </div>
         </main>
     </div>
 
-    <!-- نافذة إضافة تشخيص -->
-    <div id="visitModal" class="fixed inset-0 bg-slate-950/90 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-xl">
-        <div class="glass-card rounded-[4rem] w-full max-w-xl p-12 shadow-2xl space-y-12 border border-white/5 animate-in zoom-in duration-500">
-            <div class="flex justify-between items-center border-b border-white/5 pb-8">
-                <h3 class="text-3xl font-black text-white tracking-tight uppercase">New Visit Diagnostic</h3>
-                <button onclick="closeModal('visitModal')" class="text-slate-500 hover:text-white bg-white/5 p-3 rounded-2xl transition-all"><i data-lucide="x-circle"></i></button>
+    <!-- نافذة إضافة زيارة -->
+    <div id="visitModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-xl">
+        <div class="glass rounded-[3.5rem] w-full max-w-lg p-10 shadow-2xl space-y-10 border border-white/5">
+            <div class="flex justify-between items-center border-b border-white/5 pb-6">
+                <h3 class="text-2xl font-black text-white">تسجيل تشخيص طبي</h3>
+                <button onclick="closeModal('visitModal')" class="text-slate-500 hover:text-white"><i data-lucide="x-circle"></i></button>
             </div>
             <form id="addVisitForm" class="space-y-8">
                 <input type="hidden" name="patientId">
-                <div class="space-y-3">
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mr-3">Clinical Diagnostic Findings</label>
-                    <textarea name="diagnosis" required rows="5" class="w-full p-8 rounded-[2.5rem] outline-none text-base font-black shadow-inner" placeholder="وصف مفصل للحالة الطبية..."></textarea>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">وصف الحالة</label>
+                    <textarea name="diagnosis" required rows="4" class="w-full p-6 text-base font-bold shadow-inner" placeholder="صف الحالة بدقة..."></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-8">
-                    <div class="space-y-3">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Severity</label>
-                        <select name="status" class="w-full p-6 rounded-[1.5rem] outline-none font-black">
-                            <option value="مستقر">Stable ✅</option>
-                            <option value="مراجعة">Follow-up ⏳</option>
-                            <option value="طوارئ">Urgent 🚨</option>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">الحالة</label>
+                        <select name="status" class="w-full p-5 font-black">
+                            <option value="مستقر">مستقر ✅</option>
+                            <option value="مراجعة">مراجعة ⏳</option>
+                            <option value="طوارئ">طوارئ 🚨</option>
                         </select>
                     </div>
-                    <div class="space-y-3">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">Visit Date</label>
-                        <input type="date" name="visitDate" required class="w-full p-6 rounded-[1.5rem] outline-none font-black uppercase">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mr-3">التاريخ</label>
+                        <input type="date" name="visitDate" required class="w-full p-5 font-bold">
                     </div>
                 </div>
-                <button type="submit" class="w-full py-7 bg-blue-600 text-white font-black rounded-[2rem] hover:bg-blue-700 shadow-2xl transition-all text-xl active:scale-95">
-                    Save Record
-                </button>
+                <button type="submit" class="w-full py-6 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-2xl">حفظ البيانات</button>
             </form>
         </div>
     </div>
 
-    <!-- التنبيهات المنبثقة -->
-    <div id="toast" class="fixed bottom-12 left-1/2 -translate-x-1/2 glass-card text-white px-12 py-7 rounded-[2.5rem] shadow-2xl transform translate-y-48 opacity-0 transition-all duration-700 z-[120] flex items-center gap-6 border border-white/10 min-w-[340px]">
-        <div class="w-12 h-12 bg-blue-600 rounded-[1.2rem] flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30 text-white"><i data-lucide="verified" class="w-7 h-7"></i></div>
-        <span id="toastMsg" class="font-black text-sm tracking-tight uppercase">Success Notification</span>
+    <!-- التنبيهات -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass text-white px-10 py-5 rounded-[2rem] shadow-2xl transform translate-y-40 opacity-0 transition-all duration-500 z-[130] flex items-center gap-5 border border-white/10 min-w-[300px]">
+        <div class="w-10 h-10 bg-green-500 rounded-2xl flex items-center justify-center shrink-0 shadow-lg text-white"><i data-lucide="check" class="w-6 h-6"></i></div>
+        <span id="toastMsg" class="font-black text-sm tracking-tight"></span>
     </div>
 
     <script type="module">
@@ -423,7 +328,7 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Config ---
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyD6MRZ7d7J1333erYoBrUGqocJNdGNjB7w",
             authDomain: "neew-aec2b.firebaseapp.com",
@@ -432,7 +337,7 @@
             messagingSenderId: "70112873200",
             appId: "1:70112873200:web:b8ef2b3863be6f1bf39035"
         };
-        const appId = 'smart-hms-pro-system';
+        const appId = 'hospital-pro-prod';
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -444,97 +349,87 @@
         window.allPatients = [];
         window.qrScanner = null;
         window.scannerLock = false;
-        let appLaunched = false;
+        let isFullyAuth = false;
 
-        // --- Interface Control ---
-        window.toggleSidebar = () => {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.toggle('closed');
-        };
-
-        window.toggleNotifications = () => {
-            document.getElementById('notificationsDropdown')?.classList.toggle('hidden');
-        };
-
-        // --- FIXED ADMIN AUTH & LAUNCH LOGIC ---
-        window.checkAdminAuth = async () => {
-            const passInput = document.getElementById('adminPassword');
-            const loginBtn = document.getElementById('loginBtn');
-
-            if (passInput.value === 'alikuka') {
-                loginBtn.disabled = true;
-                loginBtn.innerHTML = '<div class="loader !border-t-white mx-auto !w-7 !h-7"></div>';
+        // --- FIXED LOGIN LOGIC (Resolves custom-token-mismatch) ---
+        window.handleLogin = async () => {
+            const pass = document.getElementById('adminPass').value;
+            const btn = document.getElementById('loginBtn');
+            
+            if (pass === 'alikuka') {
+                btn.disabled = true;
+                btn.innerHTML = '<div class="loader !border-t-white mx-auto"></div>';
                 
-                // Hide login immediately and show loader
-                document.getElementById('adminLoginScreen').classList.add('hidden');
-                document.getElementById('loadingScreen').classList.remove('hidden');
-                
+                // Transition UI
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('syncScreen').classList.remove('hidden');
+
                 try {
-                    // Check if already authenticated or start new session
-                    if (!auth.currentUser) {
+                    // Rule 3: Auth Before Queries 
+                    // Optimized Auth: Try Token if valid, but always fallback to Anonymous to avoid mismatch errors
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } catch (tokenErr) {
+                            console.warn("Token mismatch/error, falling back to anonymous auth...");
+                            await signInAnonymously(auth);
+                        }
+                    } else {
                         await signInAnonymously(auth);
                     }
-                    // Explicitly call launchApp after successful auth check
-                    launchApp();
+                    // launchSystem is triggered by onAuthStateChanged reliably
                 } catch (e) {
-                    console.error("Auth Error:", e);
-                    resetLoginUI("فشل الاتصال بخادم البيانات!");
+                    console.error("Auth System Error", e);
+                    resetToLogin("فشل في تهيئة النظام السحابي!");
                 }
             } else {
-                const err = document.getElementById('authError');
-                err.classList.remove('hidden');
-                setTimeout(() => err.classList.add('hidden'), 3000);
-                passInput.value = '';
+                document.getElementById('loginError').classList.remove('hidden');
+                setTimeout(() => document.getElementById('loginError').classList.add('hidden'), 3000);
             }
         };
 
-        function resetLoginUI(msg) {
-            document.getElementById('adminLoginScreen').classList.remove('hidden');
-            document.getElementById('loadingScreen').classList.add('hidden');
-            const err = document.getElementById('authError');
-            err.innerText = msg;
-            err.classList.remove('hidden');
-            const b = document.getElementById('loginBtn');
-            b.disabled = false;
-            b.innerHTML = '<span>دخول النظام</span><i data-lucide="arrow-right-circle"></i>';
+        function resetToLogin(msg) {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('syncScreen').classList.add('hidden');
+            document.getElementById('loginError').innerText = msg;
+            document.getElementById('loginError').classList.remove('hidden');
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('loginBtn').innerHTML = 'دخول النظام <i data-lucide="shield-check"></i>';
             lucide.createIcons();
         }
 
-        // Monitoring auth state changes in the background
         onAuthStateChanged(auth, (user) => {
-            // Only launch if the user entered the correct password
-            if (user && document.getElementById('adminLoginScreen').classList.contains('hidden')) {
-                launchApp();
+            // Only trigger app launch if loginScreen is hidden (implies user entered password)
+            if (user && document.getElementById('loginScreen').classList.contains('hidden') && !isFullyAuth) {
+                launchSystem();
             }
         });
 
-        function launchApp() {
-            if (appLaunched) return;
-            appLaunched = true;
-
-            const loader = document.getElementById('loadingScreen');
-            loader.classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => loader.classList.add('hidden'), 500);
+        function launchSystem() {
+            isFullyAuth = true;
+            const sync = document.getElementById('syncScreen');
+            sync.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => sync.classList.add('hidden'), 500);
             
             document.getElementById('mainApp').classList.remove('hidden');
-            initSystem();
+            initDataListeners();
             lucide.createIcons();
         }
 
-        function initSystem() {
-            // Global Patient Listener
+        // --- Data Listeners ---
+        function initDataListeners() {
             onSnapshot(getPatientsColl(), (snap) => {
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                // Rule 2: Sort in Memory
                 list.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 window.allPatients = list;
                 
                 const c = document.getElementById('count-patients');
                 if (c) c.innerText = list.length;
-                updateUI();
-            });
+                refreshUI();
+            }, (err) => console.error("Patients Fetch Error", err));
 
-            // Stats Listener
             onSnapshot(getVisitsColl(), (snap) => {
                 const visits = [];
                 snap.forEach(d => visits.push(d.data()));
@@ -542,63 +437,58 @@
                 const ce = document.getElementById('count-emergency');
                 if (cv) cv.innerText = visits.length;
                 if (ce) ce.innerText = visits.filter(v => v.status === 'طوارئ').length;
-            });
+            }, (err) => console.error("Visits Fetch Error", err));
 
-            document.getElementById('patientSearch').oninput = updateUI;
+            document.getElementById('patientSearch').oninput = refreshUI;
         }
 
-        function updateUI() {
+        function refreshUI() {
             const q = document.getElementById('patientSearch')?.value?.toLowerCase() || "";
             const filtered = window.allPatients.filter(p => 
-                (p.name?.toLowerCase().includes(q)) || 
-                (p.phone?.includes(q)) ||
-                (p.id?.toLowerCase().includes(q))
+                (p.name?.toLowerCase().includes(q)) || (p.phone?.includes(q)) || (p.id?.toLowerCase().includes(q))
             );
-            renderFullList(filtered);
+            renderList(filtered);
             renderLatest(window.allPatients.slice(0, 5));
         }
 
         function renderLatest(list) {
             const body = document.getElementById('latest-table-body');
             if (!body) return;
-            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black uppercase tracking-widest">No Recent Activity</td></tr>'; return; }
+            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-16 text-center text-slate-700 italic font-black uppercase tracking-widest">No Activity</td></tr>'; return; }
             body.innerHTML = list.map(p => `
-                <tr class="hover:bg-white/5 transition-colors group font-black">
-                    <td class="px-10 py-6 text-slate-200">${p.name || '---'}</td>
-                    <td class="px-10 py-6 text-center"><span class="bg-blue-600/10 text-blue-500 px-4 py-1.5 rounded-xl text-[10px] font-black border border-blue-600/20 uppercase tracking-widest">${p.bloodType}</span></td>
-                    <td class="px-10 py-6 text-center text-slate-500 text-[11px] uppercase tracking-tighter">${p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('ar-EG') : 'Processing'}</td>
-                    <td class="px-10 py-6 text-center">
-                        <button onclick="viewPatient('${p.id}')" class="p-4 bg-slate-900 rounded-2xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all shadow-xl">
-                            <i data-lucide="navigation-2" class="w-5 h-5"></i>
-                        </button>
+                <tr class="hover:bg-white/5 transition-colors font-bold">
+                    <td class="px-8 py-5 text-slate-200">${p.name || '---'}</td>
+                    <td class="px-8 py-5 text-center"><span class="bg-blue-600/10 text-blue-500 px-3 py-1 rounded-xl text-[10px] font-black border border-blue-500/20 uppercase">${p.bloodType}</span></td>
+                    <td class="px-8 py-5 text-center text-slate-500 text-[11px]">${p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('ar-EG') : 'Processing'}</td>
+                    <td class="px-8 py-5 text-center">
+                        <button onclick="viewPatient('${p.id}')" class="p-3 glass rounded-xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
                     </td>
                 </tr>
             `).join('');
             lucide.createIcons();
         }
 
-        function renderFullList(list) {
+        function renderList(list) {
             const body = document.getElementById('full-list-body');
             if (!body) return;
-            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black">لا توجد نتائج</td></tr>'; return; }
+            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black">لا توجد نتائج مطابقة</td></tr>'; return; }
             body.innerHTML = list.map(p => `
-                <tr class="hover:bg-white/5 transition-all group font-black border-b border-white/5">
-                    <td class="px-10 py-8">
-                        <div class="text-white text-lg font-black tracking-tight leading-none mb-3 group-hover:text-blue-400 transition-colors">${p.name || '---'}</div>
-                        <div class="text-[9px] text-slate-500 uppercase tracking-[0.3em] font-mono">Serial: ${p.id}</div>
+                <tr class="hover:bg-white/5 transition-all font-black border-b border-white/5">
+                    <td class="px-8 py-7">
+                        <div class="text-white text-lg tracking-tight leading-none mb-2">${p.name || '---'}</div>
+                        <div class="text-[9px] text-slate-500 uppercase font-mono tracking-[0.2em]">ID: ${p.id}</div>
                     </td>
-                    <td class="px-10 py-8 text-slate-400 font-mono tracking-widest text-sm">${p.phone || '---'}</td>
-                    <td class="px-10 py-8 text-center"><span class="glass-card px-5 py-2.5 rounded-2xl text-[11px] font-black text-slate-300 border border-white/5 uppercase tracking-widest">${p.age || '0'} Years</span></td>
-                    <td class="px-10 py-8 text-center">
-                        <button onclick="viewPatient('${p.id}')" class="bg-blue-600/10 text-blue-500 p-5 rounded-3xl hover:bg-blue-600 hover:text-white transition-all inline-flex shadow-2xl active:scale-95 group-hover:scale-110">
-                            <i data-lucide="chevron-left" class="w-7 h-7"></i>
-                        </button>
+                    <td class="px-8 py-7 text-slate-400 font-mono tracking-widest text-sm">${p.phone || '---'}</td>
+                    <td class="px-8 py-7 text-center"><span class="glass px-4 py-2 rounded-xl text-[11px] text-slate-300 uppercase tracking-widest">${p.age || '0'} سنة</span></td>
+                    <td class="px-8 py-7 text-center">
+                        <button onclick="viewPatient('${p.id}')" class="bg-blue-600/10 text-blue-500 p-4 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"><i data-lucide="eye" class="w-6 h-6"></i></button>
                     </td>
                 </tr>
             `).join('');
             lucide.createIcons();
         }
 
+        // --- Navigation ---
         window.switchView = async (id) => {
             if (id !== 'scan') await stopScanner();
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
@@ -606,14 +496,11 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
             document.getElementById(`nav-${id}`)?.classList.add('nav-active');
 
-            const m = { 'dashboard': 'لوحة التحكم', 'patients': 'إدارة السجلات', 'add': 'تسجيل عضوية', 'scan': 'التعرف السريع', 'details': 'الملف السريري' };
-            const t = document.querySelector('#viewTitle h2');
+            const m = { 'dashboard': 'لوحة التحكم', 'patients': 'السجلات الطبية', 'add': 'تسجيل مريض', 'scan': 'التعرف الذكي', 'details': 'الملف الطبي' };
+            const t = document.getElementById('viewTitle');
             if (t) t.innerText = m[id] || 'التفاصيل';
 
-            if (window.innerWidth < 1024) {
-                const s = document.getElementById('sidebar');
-                if (s && !s.classList.contains('closed')) toggleSidebar();
-            }
+            if (window.innerWidth < 1024) toggleSidebar();
             if (id === 'scan') setTimeout(startScanner, 500);
             lucide.createIcons();
         };
@@ -626,7 +513,7 @@
                 if (snap.exists()) p = snap.data();
             }
             if (p) renderDetails(id, p);
-            else showToast("Record ID Not Found!");
+            else showToast("السجل المطلوب غير متوفر!");
         };
 
         async function renderDetails(id, p) {
@@ -638,52 +525,38 @@
             const c = document.getElementById('details-container');
             if (c) {
                 c.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                        <div class="lg:col-span-4 space-y-10">
-                            <div class="glass-card rounded-[4rem] p-12 shadow-2xl text-center border border-white/10 relative overflow-hidden">
-                                <div id="qr-result" class="mx-auto mb-12 bg-white p-6 border-8 border-slate-950 rounded-[3rem] shadow-2xl inline-block relative z-10"></div>
-                                <h2 class="text-4xl font-black text-white tracking-tight">${p.name || '---'}</h2>
-                                <p class="text-blue-500 font-black text-[10px] uppercase tracking-[0.5em] mt-5">ID: ${id}</p>
-                                <div class="grid grid-cols-2 gap-6 mt-12">
-                                    <div class="bg-white/5 p-6 rounded-[2.5rem] border border-white/5">
-                                        <p class="text-[10px] text-slate-500 font-black uppercase mb-2">Gender</p>
-                                        <p class="text-lg font-black text-white uppercase">${p.gender}</p>
-                                    </div>
-                                    <div class="bg-red-600/10 p-6 rounded-[2.5rem] border border-red-600/10">
-                                        <p class="text-[10px] text-red-400 font-black uppercase mb-2">Blood</p>
-                                        <p class="text-lg font-black text-red-500 uppercase">${p.bloodType}</p>
-                                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <div class="lg:col-span-4 space-y-8">
+                            <div class="glass rounded-[4rem] p-12 shadow-2xl text-center border border-white/10 relative overflow-hidden">
+                                <div id="qr-result" class="mx-auto mb-10 bg-white p-6 border-8 border-slate-950 rounded-[3rem] shadow-2xl inline-block relative z-10"></div>
+                                <h2 class="text-4xl font-black text-white leading-tight tracking-tight uppercase">${p.name || '---'}</h2>
+                                <p class="text-blue-500 font-black text-[10px] uppercase tracking-[0.4em] mt-4 font-mono">${id}</p>
+                                <div class="grid grid-cols-2 gap-4 mt-12">
+                                    <div class="bg-white/5 p-6 rounded-[2rem] border border-white/5"><p class="text-[9px] text-slate-500 font-black uppercase mb-1">Gender</p><p class="text-base font-black text-slate-200 uppercase">${p.gender}</p></div>
+                                    <div class="bg-red-600/10 p-6 rounded-[2rem] border border-red-600/10"><p class="text-[9px] text-red-400 font-black uppercase mb-1">Blood</p><p class="text-base font-black text-red-500 uppercase">${p.bloodType}</p></div>
                                 </div>
+                            </div>
+                            <div class="glass rounded-[3rem] p-8 border border-white/5 space-y-4 font-bold">
+                                <div class="flex justify-between items-center py-2 border-b border-white/5"><span class="text-slate-500 text-xs">رقم الجوال</span><span>${p.phone}</span></div>
+                                <div class="bg-amber-500/5 p-5 rounded-3xl border border-amber-500/10 text-xs text-amber-500 italic leading-relaxed">"${p.notes || 'لا يوجد ملاحظات سابقة.'}"</div>
                             </div>
                         </div>
                         <div class="lg:col-span-8 space-y-10">
-                            <div class="glass-card rounded-[4rem] p-10 lg:p-16 border border-white/10 shadow-2xl">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8 mb-16">
-                                    <div class="flex items-center gap-5">
-                                        <div class="w-3 h-12 bg-blue-600 rounded-full"></div>
-                                        <h3 class="text-3xl font-black text-white tracking-tight">التاريخ الطبي</h3>
-                                    </div>
-                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-6 rounded-[2rem] font-black shadow-2xl active:scale-95 text-sm uppercase">
-                                        + إضافة زيارة
-                                    </button>
+                            <div class="glass rounded-[4rem] p-10 lg:p-16 border border-white/10 shadow-2xl">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-16">
+                                    <h3 class="text-3xl font-black text-white tracking-tight uppercase">Medical History</h3>
+                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-6 rounded-[2rem] font-black shadow-2xl active:scale-95 text-sm uppercase">+ Record Visit</button>
                                 </div>
                                 <div class="space-y-8">
-                                    ${visits.length === 0 ? '<div class="text-center py-24 text-slate-800 font-black tracking-[0.5em] uppercase italic opacity-50">No Data Synchronized</div>' : ''}
+                                    ${visits.length === 0 ? '<div class="text-center py-24 text-slate-800 font-black tracking-[0.5em] uppercase italic opacity-50">No Activity Found</div>' : ''}
                                     ${visits.map(v => `
                                         <div class="p-10 bg-white/5 rounded-[3rem] border-r-[12px] border-blue-600 shadow-2xl">
                                             <div class="flex justify-between items-start mb-6">
-                                                <div class="space-y-2">
-                                                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">الطبيب المعالج</p>
-                                                    <p class="text-xl font-black text-white tracking-tight">${v.doctorName || 'المدير العام'}</p>
-                                                </div>
-                                                <span class="px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] ${v.status === 'طوارئ' ? 'bg-red-600 text-white shadow-2xl' : 'bg-blue-600/20 text-blue-400 border border-blue-600/20'}">${v.status}</span>
+                                                <div><p class="text-[10px] font-black text-slate-500 uppercase">Physician</p><p class="text-xl font-black text-white">${v.doctorName || 'GENERAL MANAGER'}</p></div>
+                                                <span class="px-5 py-2 rounded-2xl text-[10px] font-black uppercase ${v.status === 'طوارئ' ? 'bg-red-600 text-white shadow-2xl' : 'bg-blue-600/20 text-blue-400 border border-blue-600/20'}">${v.status}</span>
                                             </div>
-                                            <div class="p-8 bg-slate-950 rounded-[2rem] border border-white/5 shadow-inner">
-                                                <p class="text-slate-300 font-black leading-relaxed text-lg">${v.diagnosis}</p>
-                                            </div>
-                                            <div class="mt-6 text-[10px] font-black text-slate-600 flex items-center gap-3 uppercase">
-                                                <i data-lucide="history" class="w-4 h-4"></i> تاريخ الزيارة: ${v.visitDate}
-                                            </div>
+                                            <div class="p-8 bg-slate-950 rounded-[2rem] border border-white/5 shadow-inner"><p class="text-slate-300 font-black leading-relaxed text-lg">${v.diagnosis}</p></div>
+                                            <div class="mt-6 text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> DATE: ${v.visitDate}</div>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -691,10 +564,16 @@
                         </div>
                     </div>
                 `;
-                new QRCode(document.getElementById("qr-result"), { text: id, width: 160, height: 160, colorDark: "#020617", colorLight: "#ffffff" });
+                new QRCode(document.getElementById("qr-result"), { text: id, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
             }
             lucide.createIcons();
         }
+
+        // --- Logic & Tools ---
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('closed');
+        };
 
         async function startScanner() {
             if (window.scannerLock) return;
@@ -718,7 +597,7 @@
             const btn = document.getElementById('saveBtn');
             const orig = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<div class="loader !border-t-white mx-auto !w-7 !h-7"></div>';
+            btn.innerHTML = '<div class="loader !border-t-white mx-auto"></div>';
 
             const f = new FormData(e.target);
             try {
@@ -727,10 +606,10 @@
                     phone: f.get('phone'), bloodType: f.get('bloodType'), notes: f.get('notes'),
                     createdAt: serverTimestamp()
                 });
-                showToast("تم مزامنة البيانات بنجاح!");
+                showToast("Medical Identity Confirmed!");
                 e.target.reset();
                 await viewPatient(docRef.id);
-            } catch (err) { showToast("فشل الحفظ السحابي!"); } 
+            } catch (err) { showToast("Network Storage Error!"); } 
             finally {
                 btn.disabled = false;
                 btn.innerHTML = orig;
@@ -757,31 +636,23 @@
                     diagnosis: f.get('diagnosis'), status: f.get('status'),
                     visitDate: f.get('visitDate'), createdAt: serverTimestamp()
                 });
-                showToast("تم تحديث السجل الطبي!");
+                showToast("Diagnostic Data Saved!");
                 closeModal('visitModal');
                 await viewPatient(pid);
-            } catch (err) { showToast("فشل التحديث!"); }
+            } catch (err) { showToast("Save Error!"); }
         };
 
         function showToast(msg) {
             const t = document.getElementById('toast');
             const m = document.getElementById('toastMsg');
             m.innerText = msg;
-            t.classList.remove('translate-y-48', 'opacity-0');
-            setTimeout(() => t.classList.add('translate-y-48', 'opacity-0'), 5000);
-        }
-
-        window.onclick = (e) => {
-            if (!e.target.closest('#notifBell') && !e.target.closest('#notificationsDropdown')) {
-                document.getElementById('notificationsDropdown')?.classList.add('hidden');
-            }
+            t.classList.remove('translate-y-40', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-40', 'opacity-0'), 4000);
         }
 
         window.onload = () => {
             lucide.createIcons();
-            document.getElementById('adminPassword').addEventListener('keypress', (e) => { 
-                if (e.key === 'Enter') checkAdminAuth(); 
-            });
+            document.getElementById('adminPass').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
         };
     </script>
 </body>
