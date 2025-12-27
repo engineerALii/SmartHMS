@@ -414,8 +414,17 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Config ---
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // --- Firebase Config (Independent Implementation) ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyD6MRZ7d7J1333erYoBrUGqocJNdGNjB7w",
+            authDomain: "neew-aec2b.firebaseapp.com",
+            projectId: "neew-aec2b",
+            storageBucket: "neew-aec2b.firebasestorage.app",
+            messagingSenderId: "70112873200",
+            appId: "1:70112873200:web:b8ef2b3863be6f1bf39035"
+        };
+        
+        // Use environment AppID or fallback to default for GitHub
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-hms-pro';
         
         const app = initializeApp(firebaseConfig);
@@ -442,19 +451,29 @@
             document.getElementById('notificationsDropdown')?.classList.toggle('hidden');
         };
 
-        // --- Admin Authentication & App Launch (Logic Fix) ---
-        window.checkAdminAuth = () => {
+        // --- Admin Authentication (Global Fix for External Hosting) ---
+        window.checkAdminAuth = async () => {
             const passInput = document.getElementById('adminPassword');
             const pass = passInput.value;
             const loginBtn = document.getElementById('loginBtn');
 
             if (pass === 'alikuka') {
-                // إخفاء شاشة الدخول وإظهار شاشة التحميل فوراً
+                // UI immediate feedback
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<div class="loader !border-t-white mx-auto !w-6 !h-6"></div>';
+                
+                // Transition to loading
                 document.getElementById('adminLoginScreen').classList.add('hidden');
                 document.getElementById('loadingScreen').classList.remove('hidden');
                 
-                // تشغيل عملية المصادقة
-                startAuth(0);
+                // Firebase Login Flow
+                try {
+                    await startAuth();
+                    // launchApp is called via onAuthStateChanged for robustness
+                } catch (e) {
+                    console.error("Login Error:", e);
+                    resetLoginUI("خطأ في الاتصال بالشبكة!");
+                }
             } else {
                 const err = document.getElementById('authError');
                 err.classList.remove('hidden');
@@ -463,23 +482,31 @@
             }
         };
 
-        async function startAuth(retry = 0) {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.error("Auth error:", err);
-                if (retry < 5) setTimeout(() => startAuth(retry + 1), 2000);
+        function resetLoginUI(msg) {
+            document.getElementById('adminLoginScreen').classList.remove('hidden');
+            document.getElementById('loadingScreen').classList.add('hidden');
+            const err = document.getElementById('authError');
+            err.innerText = msg;
+            err.classList.remove('hidden');
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<span>دخول للنظام</span><i data-lucide="chevron-left"></i>';
+            lucide.createIcons();
+        }
+
+        async function startAuth() {
+            // Rule 3: Auth Before Queries
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                return signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                return signInAnonymously(auth);
             }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 isFirebaseAuthenticated = true;
-                // إطلاق التطبيق فقط إذا تم تجاوز شاشة كلمة المرور
+                // Only launch if the user has already entered the correct password
                 if (document.getElementById('adminLoginScreen').classList.contains('hidden')) {
                     launchApp();
                 }
@@ -487,19 +514,21 @@
         });
 
         function launchApp() {
-            document.getElementById('loadingScreen').classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => {
-                document.getElementById('loadingScreen').classList.add('hidden');
-            }, 500);
+            const loading = document.getElementById('loadingScreen');
+            loading.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => loading.classList.add('hidden'), 500);
+            
             document.getElementById('mainApp').classList.remove('hidden');
             initSystem();
             lucide.createIcons();
         }
 
         function initSystem() {
+            // Rule 2: No Complex Queries
             onSnapshot(getPatientsColl(), (snap) => {
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                // In-memory sorting (Rule 2)
                 list.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 window.allPatients = list;
                 
