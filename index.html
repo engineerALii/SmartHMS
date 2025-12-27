@@ -78,7 +78,7 @@
             <h2 class="text-3xl font-black text-white">تسجيل الدخول</h2>
             <div class="space-y-5">
                 <input type="password" id="adminPass" class="w-full p-6 text-center text-3xl tracking-[0.5em] outline-none" placeholder="••••">
-                <button onclick="handleLogin()" id="loginBtn" class="w-full py-6 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-xl flex items-center justify-center gap-3">
+                <button onclick="handleLogin()" id="loginBtn" class="w-full py-6 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-xl flex items-center justify-center gap-3 transition-transform active:scale-95">
                     دخول النظام <i data-lucide="shield-check"></i>
                 </button>
             </div>
@@ -87,7 +87,7 @@
     </div>
 
     <!-- 2. شاشة التحميل -->
-    <div id="syncScreen" class="fixed inset-0 bg-slate-950 z-[110] flex flex-col items-center justify-center hidden">
+    <div id="syncScreen" class="fixed inset-0 bg-slate-950 z-[110] flex flex-col items-center justify-center hidden transition-opacity duration-500">
         <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
              class="w-24 h-24 mb-10 rounded-3xl animate-pulse shadow-2xl border-2 border-blue-500/40" alt="Logo">
         <div class="loader mb-4"></div>
@@ -110,16 +110,16 @@
 
             <nav class="flex-1 p-6 space-y-3 overflow-y-auto custom-scrollbar">
                 <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all nav-active">
-                    <i data-lucide="grid"></i> <span class="font-bold">لوحة التحكم</span>
+                    <i data-lucide="grid"></i> <span class="font-bold uppercase text-sm">لوحة التحكم</span>
                 </button>
                 <button onclick="switchView('patients')" id="nav-patients" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
-                    <i data-lucide="users"></i> <span class="font-bold">قائمة المرضى</span>
+                    <i data-lucide="users"></i> <span class="font-bold uppercase text-sm">قائمة المرضى</span>
                 </button>
                 <button onclick="switchView('add')" id="nav-add" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
-                    <i data-lucide="user-plus"></i> <span class="font-bold">إضافة مريض</span>
+                    <i data-lucide="user-plus"></i> <span class="font-bold uppercase text-sm">إضافة مريض</span>
                 </button>
                 <button onclick="switchView('scan')" id="nav-scan" class="nav-btn w-full flex items-center gap-5 px-6 py-5 rounded-[1.5rem] text-slate-400 hover:bg-white/5 transition-all">
-                    <i data-lucide="qr-code"></i> <span class="font-bold">مسح الباركود</span>
+                    <i data-lucide="qr-code"></i> <span class="font-bold uppercase text-sm">مسح الباركود</span>
                 </button>
             </nav>
 
@@ -153,21 +153,21 @@
                 <!-- Dashboard -->
                 <div id="view-dashboard" class="view-content view-anim space-y-10">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group">
+                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group border border-white/5">
                             <div class="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="users" class="w-8 h-8"></i></div>
                             <div>
                                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">إجمالي المرضى</p>
                                 <p class="text-4xl font-black text-white" id="count-patients">0</p>
                             </div>
                         </div>
-                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group">
+                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group border border-white/5">
                             <div class="w-16 h-16 bg-green-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="activity" class="w-8 h-8"></i></div>
                             <div>
                                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">زيارات اليوم</p>
                                 <p class="text-4xl font-black text-white" id="count-visits">0</p>
                             </div>
                         </div>
-                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group sm:col-span-2 lg:col-span-1">
+                        <div class="glass p-10 rounded-[2.5rem] flex flex-col gap-6 relative overflow-hidden group sm:col-span-2 lg:col-span-1 border border-white/5">
                             <div class="w-16 h-16 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="alert-circle" class="w-8 h-8"></i></div>
                             <div>
                                 <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">حالات طارئة</p>
@@ -176,7 +176,7 @@
                         </div>
                     </div>
 
-                    <div class="glass rounded-[3rem] overflow-hidden">
+                    <div class="glass rounded-[3rem] overflow-hidden border border-white/5">
                         <div class="p-8 border-b border-white/5 flex justify-between items-center bg-white/5">
                             <h3 class="font-black text-xl text-white">أحدث السجلات</h3>
                         </div>
@@ -204,7 +204,7 @@
                             <input type="text" id="patientSearch" placeholder="بحث باسم المريض أو الجوال..." class="w-full pr-14 pl-6 py-5 rounded-[1.5rem] outline-none font-black shadow-inner">
                         </div>
                     </div>
-                    <div class="glass rounded-[3rem] overflow-hidden">
+                    <div class="glass rounded-[3rem] overflow-hidden border border-white/5">
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-right whitespace-nowrap font-bold">
                                 <thead class="bg-white/5 text-slate-500 text-[10px] font-black uppercase">
@@ -223,7 +223,7 @@
 
                 <!-- Add Patient -->
                 <div id="view-add" class="view-content view-anim hidden">
-                    <div class="max-w-4xl mx-auto glass p-10 lg:p-16 rounded-[4rem] shadow-2xl">
+                    <div class="max-w-4xl mx-auto glass p-10 lg:p-16 rounded-[4rem] shadow-2xl border border-white/5">
                         <h3 class="text-3xl font-black text-center mb-12">تسجيل مريض جديد</h3>
                         <form id="addPatientForm" class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-2">
@@ -265,7 +265,7 @@
 
                 <!-- QR Scan -->
                 <div id="view-scan" class="view-content view-anim hidden">
-                    <div class="max-w-xl mx-auto glass p-10 lg:p-14 rounded-[4rem] text-center space-y-10">
+                    <div class="max-w-xl mx-auto glass p-10 lg:p-14 rounded-[4rem] text-center space-y-10 border border-white/5">
                         <div class="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner"><i data-lucide="scan" class="w-10 h-10"></i></div>
                         <h3 class="text-3xl font-black">ماسح الهوية الطبية</h3>
                         <p class="text-slate-500 text-sm font-bold uppercase tracking-widest leading-relaxed">وجه الكاميرا نحو كود سوار المريض للتعرف الفوري</p>
@@ -278,7 +278,7 @@
 
                 <!-- Patient Details -->
                 <div id="view-details" class="view-content view-anim hidden">
-                    <div id="details-container" class="space-y-10"></div>
+                    <div id="details-container" class="space-y-10 pb-16"></div>
                 </div>
 
             </div>
@@ -287,7 +287,7 @@
 
     <!-- نافذة إضافة زيارة -->
     <div id="visitModal" class="fixed inset-0 bg-slate-950/90 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-xl">
-        <div class="glass rounded-[3.5rem] w-full max-w-lg p-10 shadow-2xl space-y-10 border border-white/5">
+        <div class="glass rounded-[4rem] w-full max-w-lg p-10 shadow-2xl space-y-10 border border-white/5">
             <div class="flex justify-between items-center border-b border-white/5 pb-6">
                 <h3 class="text-2xl font-black text-white">تسجيل تشخيص طبي</h3>
                 <button onclick="closeModal('visitModal')" class="text-slate-500 hover:text-white"><i data-lucide="x-circle"></i></button>
@@ -337,7 +337,7 @@
             messagingSenderId: "70112873200",
             appId: "1:70112873200:web:b8ef2b3863be6f1bf39035"
         };
-        const appId = 'hospital-pro-prod';
+        const appId = 'smart-hms-pro-system';
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -349,38 +349,38 @@
         window.allPatients = [];
         window.qrScanner = null;
         window.scannerLock = false;
-        let isFullyAuth = false;
+        let isSystemLaunched = false;
 
-        // --- FIXED LOGIN LOGIC (Resolves custom-token-mismatch) ---
+        // --- Auth Logic (Force Direct Launch) ---
         window.handleLogin = async () => {
-            const pass = document.getElementById('adminPass').value;
+            const passInput = document.getElementById('adminPass');
             const btn = document.getElementById('loginBtn');
             
-            if (pass === 'alikuka') {
+            if (passInput.value === 'alikuka') {
                 btn.disabled = true;
                 btn.innerHTML = '<div class="loader !border-t-white mx-auto"></div>';
                 
-                // Transition UI
+                // الانتقال الفوري لضمان عدم التعليق
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('syncScreen').classList.remove('hidden');
 
                 try {
-                    // Rule 3: Auth Before Queries 
-                    // Optimized Auth: Try Token if valid, but always fallback to Anonymous to avoid mismatch errors
+                    // Rule 3: Auth Before Queries
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         try {
                             await signInWithCustomToken(auth, __initial_auth_token);
-                        } catch (tokenErr) {
-                            console.warn("Token mismatch/error, falling back to anonymous auth...");
+                        } catch (e) {
                             await signInAnonymously(auth);
                         }
                     } else {
                         await signInAnonymously(auth);
                     }
-                    // launchSystem is triggered by onAuthStateChanged reliably
+                    
+                    // التشغيل المباشر بعد التأكد من نجاح المصادقة
+                    launchSystem();
                 } catch (e) {
-                    console.error("Auth System Error", e);
-                    resetToLogin("فشل في تهيئة النظام السحابي!");
+                    console.error("Auth Fail", e);
+                    resetLoginUI("فشل الاتصال بخادم السحابة!");
                 }
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
@@ -388,7 +388,7 @@
             }
         };
 
-        function resetToLogin(msg) {
+        function resetLoginUI(msg) {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('syncScreen').classList.add('hidden');
             document.getElementById('loginError').innerText = msg;
@@ -399,14 +399,16 @@
         }
 
         onAuthStateChanged(auth, (user) => {
-            // Only trigger app launch if loginScreen is hidden (implies user entered password)
-            if (user && document.getElementById('loginScreen').classList.contains('hidden') && !isFullyAuth) {
+            // التحقق مما إذا كان المستخدم قد تجاوز شاشة كلمة المرور بالفعل
+            if (user && document.getElementById('loginScreen').classList.contains('hidden') && !isSystemLaunched) {
                 launchSystem();
             }
         });
 
         function launchSystem() {
-            isFullyAuth = true;
+            if (isSystemLaunched) return;
+            isSystemLaunched = true;
+
             const sync = document.getElementById('syncScreen');
             sync.classList.add('opacity-0', 'pointer-events-none');
             setTimeout(() => sync.classList.add('hidden'), 500);
@@ -418,17 +420,17 @@
 
         // --- Data Listeners ---
         function initDataListeners() {
+            // Rule 2: In-memory sorting and filtering
             onSnapshot(getPatientsColl(), (snap) => {
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-                // Rule 2: Sort in Memory
                 list.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
                 window.allPatients = list;
                 
                 const c = document.getElementById('count-patients');
                 if (c) c.innerText = list.length;
-                refreshUI();
-            }, (err) => console.error("Patients Fetch Error", err));
+                updateUIGlobally();
+            });
 
             onSnapshot(getVisitsColl(), (snap) => {
                 const visits = [];
@@ -437,12 +439,12 @@
                 const ce = document.getElementById('count-emergency');
                 if (cv) cv.innerText = visits.length;
                 if (ce) ce.innerText = visits.filter(v => v.status === 'طوارئ').length;
-            }, (err) => console.error("Visits Fetch Error", err));
+            });
 
-            document.getElementById('patientSearch').oninput = refreshUI;
+            document.getElementById('patientSearch').oninput = updateUIGlobally;
         }
 
-        function refreshUI() {
+        function updateUIGlobally() {
             const q = document.getElementById('patientSearch')?.value?.toLowerCase() || "";
             const filtered = window.allPatients.filter(p => 
                 (p.name?.toLowerCase().includes(q)) || (p.phone?.includes(q)) || (p.id?.toLowerCase().includes(q))
@@ -454,14 +456,14 @@
         function renderLatest(list) {
             const body = document.getElementById('latest-table-body');
             if (!body) return;
-            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-16 text-center text-slate-700 italic font-black uppercase tracking-widest">No Activity</td></tr>'; return; }
+            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-16 text-center text-slate-700 italic font-black uppercase tracking-widest">No Activity Recorded</td></tr>'; return; }
             body.innerHTML = list.map(p => `
-                <tr class="hover:bg-white/5 transition-colors font-bold">
+                <tr class="hover:bg-white/5 transition-colors font-bold border-b border-white/5">
                     <td class="px-8 py-5 text-slate-200">${p.name || '---'}</td>
-                    <td class="px-8 py-5 text-center"><span class="bg-blue-600/10 text-blue-500 px-3 py-1 rounded-xl text-[10px] font-black border border-blue-500/20 uppercase">${p.bloodType}</span></td>
+                    <td class="px-8 py-5 text-center"><span class="bg-blue-600/10 text-blue-500 px-4 py-1.5 rounded-xl text-[10px] font-black border border-blue-600/20 uppercase">${p.bloodType}</span></td>
                     <td class="px-8 py-5 text-center text-slate-500 text-[11px]">${p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('ar-EG') : 'Processing'}</td>
                     <td class="px-8 py-5 text-center">
-                        <button onclick="viewPatient('${p.id}')" class="p-3 glass rounded-xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                        <button onclick="viewPatient('${p.id}')" class="p-3 bg-slate-900 rounded-xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all shadow-xl"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -471,24 +473,26 @@
         function renderList(list) {
             const body = document.getElementById('full-list-body');
             if (!body) return;
-            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black">لا توجد نتائج مطابقة</td></tr>'; return; }
+            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black uppercase">No Data Found</td></tr>'; return; }
             body.innerHTML = list.map(p => `
                 <tr class="hover:bg-white/5 transition-all font-black border-b border-white/5">
-                    <td class="px-8 py-7">
-                        <div class="text-white text-lg tracking-tight leading-none mb-2">${p.name || '---'}</div>
-                        <div class="text-[9px] text-slate-500 uppercase font-mono tracking-[0.2em]">ID: ${p.id}</div>
+                    <td class="px-10 py-8">
+                        <div class="text-white text-lg tracking-tight leading-none mb-3 group-hover:text-blue-400 transition-colors">${p.name || '---'}</div>
+                        <div class="text-[9px] text-slate-500 uppercase tracking-[0.3em] font-mono font-bold">Serial: ${p.id}</div>
                     </td>
-                    <td class="px-8 py-7 text-slate-400 font-mono tracking-widest text-sm">${p.phone || '---'}</td>
-                    <td class="px-8 py-7 text-center"><span class="glass px-4 py-2 rounded-xl text-[11px] text-slate-300 uppercase tracking-widest">${p.age || '0'} سنة</span></td>
-                    <td class="px-8 py-7 text-center">
-                        <button onclick="viewPatient('${p.id}')" class="bg-blue-600/10 text-blue-500 p-4 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-95"><i data-lucide="eye" class="w-6 h-6"></i></button>
+                    <td class="px-10 py-8 text-slate-400 font-mono tracking-widest text-sm">${p.phone || '---'}</td>
+                    <td class="px-10 py-8 text-center"><span class="glass px-5 py-2.5 rounded-2xl text-[11px] font-black text-slate-300 border border-white/5 uppercase tracking-widest">${p.age || '0'} Years</span></td>
+                    <td class="px-10 py-8 text-center">
+                        <button onclick="viewPatient('${p.id}')" class="bg-blue-600/10 text-blue-500 p-5 rounded-3xl hover:bg-blue-600 hover:text-white transition-all inline-flex shadow-2xl active:scale-95 group-hover:scale-110">
+                            <i data-lucide="eye" class="w-7 h-7"></i>
+                        </button>
                     </td>
                 </tr>
             `).join('');
             lucide.createIcons();
         }
 
-        // --- Navigation ---
+        // --- Navigation & Scanner ---
         window.switchView = async (id) => {
             if (id !== 'scan') await stopScanner();
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
@@ -496,7 +500,7 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
             document.getElementById(`nav-${id}`)?.classList.add('nav-active');
 
-            const m = { 'dashboard': 'لوحة التحكم', 'patients': 'السجلات الطبية', 'add': 'تسجيل مريض', 'scan': 'التعرف الذكي', 'details': 'الملف الطبي' };
+            const m = { 'dashboard': 'لوحة التحكم', 'patients': 'السجلات الطبية', 'add': 'تسجيل مريض', 'scan': 'التعرف السريع', 'details': 'الملف السريري' };
             const t = document.getElementById('viewTitle');
             if (t) t.innerText = m[id] || 'التفاصيل';
 
@@ -513,7 +517,7 @@
                 if (snap.exists()) p = snap.data();
             }
             if (p) renderDetails(id, p);
-            else showToast("السجل المطلوب غير متوفر!");
+            else showToast("Record ID Not Found!");
         };
 
         async function renderDetails(id, p) {
@@ -525,38 +529,42 @@
             const c = document.getElementById('details-container');
             if (c) {
                 c.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        <div class="lg:col-span-4 space-y-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                        <div class="lg:col-span-4 space-y-10">
                             <div class="glass rounded-[4rem] p-12 shadow-2xl text-center border border-white/10 relative overflow-hidden">
-                                <div id="qr-result" class="mx-auto mb-10 bg-white p-6 border-8 border-slate-950 rounded-[3rem] shadow-2xl inline-block relative z-10"></div>
-                                <h2 class="text-4xl font-black text-white leading-tight tracking-tight uppercase">${p.name || '---'}</h2>
-                                <p class="text-blue-500 font-black text-[10px] uppercase tracking-[0.4em] mt-4 font-mono">${id}</p>
-                                <div class="grid grid-cols-2 gap-4 mt-12">
-                                    <div class="bg-white/5 p-6 rounded-[2rem] border border-white/5"><p class="text-[9px] text-slate-500 font-black uppercase mb-1">Gender</p><p class="text-base font-black text-slate-200 uppercase">${p.gender}</p></div>
-                                    <div class="bg-red-600/10 p-6 rounded-[2rem] border border-red-600/10"><p class="text-[9px] text-red-400 font-black uppercase mb-1">Blood</p><p class="text-base font-black text-red-500 uppercase">${p.bloodType}</p></div>
+                                <div class="absolute inset-0 bg-blue-600/5 blur-3xl rounded-full"></div>
+                                <div id="qr-result" class="mx-auto mb-12 bg-white p-6 border-8 border-slate-950 rounded-[3rem] shadow-2xl inline-block relative z-10"></div>
+                                <h2 class="text-4xl font-black text-white leading-tight tracking-tight">${p.name || '---'}</h2>
+                                <p class="text-blue-500 font-black text-[10px] uppercase tracking-[0.5em] mt-5 font-mono">ID: ${id}</p>
+                                <div class="grid grid-cols-2 gap-6 mt-12">
+                                    <div class="bg-white/5 p-6 rounded-[2.5rem] border border-white/5 shadow-inner"><p class="text-[10px] text-slate-500 font-black uppercase mb-2">Gender</p><p class="text-lg font-black text-white uppercase">${p.gender}</p></div>
+                                    <div class="bg-red-600/10 p-6 rounded-[2.5rem] border border-red-600/10 shadow-inner"><p class="text-[10px] text-red-400 font-black uppercase mb-2">Blood</p><p class="text-lg font-black text-red-500 uppercase">${p.bloodType}</p></div>
                                 </div>
                             </div>
                             <div class="glass rounded-[3rem] p-8 border border-white/5 space-y-4 font-bold">
                                 <div class="flex justify-between items-center py-2 border-b border-white/5"><span class="text-slate-500 text-xs">رقم الجوال</span><span>${p.phone}</span></div>
-                                <div class="bg-amber-500/5 p-5 rounded-3xl border border-amber-500/10 text-xs text-amber-500 italic leading-relaxed">"${p.notes || 'لا يوجد ملاحظات سابقة.'}"</div>
+                                <div class="bg-amber-500/5 p-5 rounded-3xl border border-amber-500/10 text-xs text-amber-500 italic leading-relaxed font-bold">"${p.notes || 'لا توجد ملاحظات سابقة.'}"</div>
                             </div>
                         </div>
                         <div class="lg:col-span-8 space-y-10">
                             <div class="glass rounded-[4rem] p-10 lg:p-16 border border-white/10 shadow-2xl">
-                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-16">
-                                    <h3 class="text-3xl font-black text-white tracking-tight uppercase">Medical History</h3>
-                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-6 rounded-[2rem] font-black shadow-2xl active:scale-95 text-sm uppercase">+ Record Visit</button>
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8 mb-16">
+                                    <div class="flex items-center gap-5">
+                                        <div class="w-3 h-12 bg-blue-600 rounded-full shadow-lg shadow-blue-600/50"></div>
+                                        <h3 class="text-3xl font-black text-white tracking-tight uppercase">Medical History</h3>
+                                    </div>
+                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-6 rounded-[2rem] font-black shadow-2xl active:scale-95 hover:bg-blue-700 transition-all text-sm uppercase">+ Record Visit</button>
                                 </div>
                                 <div class="space-y-8">
-                                    ${visits.length === 0 ? '<div class="text-center py-24 text-slate-800 font-black tracking-[0.5em] uppercase italic opacity-50">No Activity Found</div>' : ''}
+                                    ${visits.length === 0 ? '<div class="text-center py-24 text-slate-800 font-black tracking-[0.5em] uppercase italic opacity-50">No Medical Data Synchronized</div>' : ''}
                                     ${visits.map(v => `
-                                        <div class="p-10 bg-white/5 rounded-[3rem] border-r-[12px] border-blue-600 shadow-2xl">
+                                        <div class="p-10 bg-white/5 rounded-[3rem] border-r-[12px] border-blue-600 hover:bg-white/10 transition-all group relative shadow-2xl">
                                             <div class="flex justify-between items-start mb-6">
-                                                <div><p class="text-[10px] font-black text-slate-500 uppercase">Physician</p><p class="text-xl font-black text-white">${v.doctorName || 'GENERAL MANAGER'}</p></div>
-                                                <span class="px-5 py-2 rounded-2xl text-[10px] font-black uppercase ${v.status === 'طوارئ' ? 'bg-red-600 text-white shadow-2xl' : 'bg-blue-600/20 text-blue-400 border border-blue-600/20'}">${v.status}</span>
+                                                <div class="space-y-2"><p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Attending Physician</p><p class="text-xl font-black text-white tracking-tight">${v.doctorName || 'GENERAL DIRECTOR'}</p></div>
+                                                <span class="px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] ${v.status === 'طوارئ' ? 'bg-red-600 text-white shadow-2xl animate-pulse' : 'bg-blue-600/20 text-blue-400 border border-blue-600/20'}">${v.status}</span>
                                             </div>
-                                            <div class="p-8 bg-slate-950 rounded-[2rem] border border-white/5 shadow-inner"><p class="text-slate-300 font-black leading-relaxed text-lg">${v.diagnosis}</p></div>
-                                            <div class="mt-6 text-[10px] font-black text-slate-600 uppercase tracking-widest flex items-center gap-2"><i data-lucide="calendar" class="w-4 h-4"></i> DATE: ${v.visitDate}</div>
+                                            <div class="p-8 bg-slate-950 rounded-[2rem] border border-white/5 shadow-inner font-bold"><p class="text-slate-300 leading-relaxed text-lg">${v.diagnosis}</p></div>
+                                            <div class="mt-6 text-[10px] font-black text-slate-600 flex items-center gap-3 uppercase tracking-widest font-bold"><i data-lucide="history" class="w-4 h-4"></i> TIMESTAMP: ${v.visitDate}</div>
                                         </div>
                                     `).join('')}
                                 </div>
@@ -564,16 +572,10 @@
                         </div>
                     </div>
                 `;
-                new QRCode(document.getElementById("qr-result"), { text: id, width: 150, height: 150, colorDark: "#020617", colorLight: "#ffffff" });
+                new QRCode(document.getElementById("qr-result"), { text: id, width: 160, height: 160, colorDark: "#020617", colorLight: "#ffffff" });
             }
             lucide.createIcons();
         }
-
-        // --- Logic & Tools ---
-        window.toggleSidebar = () => {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.toggle('closed');
-        };
 
         async function startScanner() {
             if (window.scannerLock) return;
@@ -592,12 +594,20 @@
             try { if (window.qrScanner.getState() === 2) await window.qrScanner.stop(); } catch (err) { console.warn(err); }
         }
 
+        // --- Logic Tools ---
+        window.toggleSidebar = () => {
+            const s = document.getElementById('sidebar');
+            if (s) s.classList.toggle('closed');
+        };
+
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
         document.getElementById('addPatientForm').onsubmit = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
             const orig = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<div class="loader !border-t-white mx-auto"></div>';
+            btn.innerHTML = '<div class="loader !border-t-white mx-auto !w-7 !h-7"></div>';
 
             const f = new FormData(e.target);
             try {
@@ -609,7 +619,7 @@
                 showToast("Medical Identity Confirmed!");
                 e.target.reset();
                 await viewPatient(docRef.id);
-            } catch (err) { showToast("Network Storage Error!"); } 
+            } catch (err) { showToast("Cloud Write Failed!"); } 
             finally {
                 btn.disabled = false;
                 btn.innerHTML = orig;
@@ -624,8 +634,6 @@
             document.getElementById('visitModal').classList.remove('hidden');
         };
 
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
         document.getElementById('addVisitForm').onsubmit = async (e) => {
             e.preventDefault();
             const f = new FormData(e.target);
@@ -636,10 +644,10 @@
                     diagnosis: f.get('diagnosis'), status: f.get('status'),
                     visitDate: f.get('visitDate'), createdAt: serverTimestamp()
                 });
-                showToast("Diagnostic Data Saved!");
+                showToast("Record Updated Successfully!");
                 closeModal('visitModal');
                 await viewPatient(pid);
-            } catch (err) { showToast("Save Error!"); }
+            } catch (err) { showToast("Update Failed!"); }
         };
 
         function showToast(msg) {
