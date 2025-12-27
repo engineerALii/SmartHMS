@@ -79,7 +79,7 @@
 
     <!-- شاشة تسجيل الدخول -->
     <div id="adminLoginScreen" class="fixed inset-0 bg-slate-950 z-[110] flex items-center justify-center p-4">
-        <div class="w-full max-w-md glass-card rounded-[3.5rem] p-10 lg:p-14 shadow-2xl text-center space-y-10 border border-white/10 animate-in fade-in zoom-in duration-500">
+        <div class="w-full max-w-md glass-card rounded-[3.5rem] p-10 lg:p-14 shadow-2xl text-center space-y-10 border border-white/10">
             <div class="relative inline-block">
                 <div class="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full"></div>
                 <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
@@ -112,7 +112,7 @@
         </div>
         <div class="flex flex-col items-center gap-4">
             <div class="loader"></div>
-            <p id="loadingStatus" class="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] text-center px-8">Syncing Cloud Services...</p>
+            <p id="loadingStatus" class="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] text-center px-8">جارِ مزامنة الخدمات السحابية...</p>
         </div>
     </div>
 
@@ -177,7 +177,7 @@
         <!-- منطقة العرض الرئيسية -->
         <main class="flex-1 h-full overflow-y-auto custom-scrollbar relative flex flex-col">
             
-            <header class="p-6 lg:p-10 flex justify-between items-center sticky top-0 z-40 bg-slate-950/90 backdrop-blur-2xl border-b border-white/5">
+            <header class="p-6 lg:p-10 flex justify-between items-center sticky top-0 z-40 bg-slate-950/90 backdrop-blur-xl border-b border-white/5">
                 <div class="flex items-center gap-5">
                     <button onclick="toggleSidebar()" class="lg:hidden p-4 glass-card rounded-2xl text-white shadow-xl">
                         <i data-lucide="menu-scale" class="w-6 h-6"></i>
@@ -213,7 +213,6 @@
 
             <div class="p-6 lg:p-12 flex-1">
                 
-                <!-- محتوى لوحة التحكم -->
                 <div id="view-dashboard" class="view-content view-transition space-y-10">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
                         <div class="stat-card p-10 rounded-[3rem] border border-white/5 flex flex-col gap-6 shadow-2xl relative overflow-hidden group">
@@ -270,7 +269,6 @@
                     </div>
                 </div>
 
-                <!-- قائمة المرضى -->
                 <div id="view-patients" class="view-content view-transition hidden space-y-10">
                     <div class="glass-card p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
                         <div class="relative w-full">
@@ -296,7 +294,6 @@
                     </div>
                 </div>
 
-                <!-- إضافة مريض -->
                 <div id="view-add" class="view-content view-transition hidden">
                     <div class="max-w-5xl mx-auto glass-card p-10 lg:p-20 rounded-[4.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
                         <div class="absolute -top-32 -left-32 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
@@ -352,7 +349,6 @@
                     </div>
                 </div>
 
-                <!-- مسح الباركود -->
                 <div id="view-scan" class="view-content view-transition hidden">
                     <div class="max-w-2xl mx-auto text-center space-y-12">
                         <div class="glass-card p-10 lg:p-16 rounded-[4.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
@@ -427,8 +423,8 @@
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Config (Safe Fallback) ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+        // --- Firebase Config ---
+        const firebaseConfig = {
             apiKey: "AIzaSyD6MRZ7d7J1333erYoBrUGqocJNdGNjB7w",
             authDomain: "neew-aec2b.firebaseapp.com",
             projectId: "neew-aec2b",
@@ -436,7 +432,7 @@
             messagingSenderId: "70112873200",
             appId: "1:70112873200:web:b8ef2b3863be6f1bf39035"
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-hms-pro-system';
+        const appId = 'smart-hms-pro-system';
         
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -448,21 +444,19 @@
         window.allPatients = [];
         window.qrScanner = null;
         window.scannerLock = false;
-        let isAuthReady = false;
+        let appLaunched = false;
 
-        // --- Interface Logic ---
+        // --- Interface Control ---
         window.toggleSidebar = () => {
-            const s = document.getElementById('sidebar');
-            const o = document.getElementById('sidebarOverlay');
-            s?.classList.toggle('closed');
-            o?.classList.toggle('hidden');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('closed');
         };
 
         window.toggleNotifications = () => {
             document.getElementById('notificationsDropdown')?.classList.toggle('hidden');
         };
 
-        // --- Admin Authentication & Safe Launch ---
+        // --- FIXED ADMIN AUTH & LAUNCH LOGIC ---
         window.checkAdminAuth = async () => {
             const passInput = document.getElementById('adminPassword');
             const loginBtn = document.getElementById('loginBtn');
@@ -471,15 +465,20 @@
                 loginBtn.disabled = true;
                 loginBtn.innerHTML = '<div class="loader !border-t-white mx-auto !w-7 !h-7"></div>';
                 
-                // الانتقال الفوري لشاشة التحميل
+                // Hide login immediately and show loader
                 document.getElementById('adminLoginScreen').classList.add('hidden');
                 document.getElementById('loadingScreen').classList.remove('hidden');
                 
                 try {
-                    await startAuth(0);
-                    // launchApp is triggered by onAuthStateChanged reliably
+                    // Check if already authenticated or start new session
+                    if (!auth.currentUser) {
+                        await signInAnonymously(auth);
+                    }
+                    // Explicitly call launchApp after successful auth check
+                    launchApp();
                 } catch (e) {
-                    resetLoginUI("Auth Connection Failed!");
+                    console.error("Auth Error:", e);
+                    resetLoginUI("فشل الاتصال بخادم البيانات!");
                 }
             } else {
                 const err = document.getElementById('authError');
@@ -497,32 +496,25 @@
             err.classList.remove('hidden');
             const b = document.getElementById('loginBtn');
             b.disabled = false;
-            b.innerHTML = '<span>دخول للنظام</span><i data-lucide="arrow-right-circle"></i>';
+            b.innerHTML = '<span>دخول النظام</span><i data-lucide="arrow-right-circle"></i>';
             lucide.createIcons();
         }
 
-        async function startAuth(retryCount = 0) {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                return signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                return signInAnonymously(auth);
-            }
-        }
-
+        // Monitoring auth state changes in the background
         onAuthStateChanged(auth, (user) => {
-            if (user && !isAuthReady) {
-                isAuthReady = true;
-                // Only launch if password was already verified
-                if (document.getElementById('adminLoginScreen').classList.contains('hidden')) {
-                    launchApp();
-                }
+            // Only launch if the user entered the correct password
+            if (user && document.getElementById('adminLoginScreen').classList.contains('hidden')) {
+                launchApp();
             }
         });
 
         function launchApp() {
-            const load = document.getElementById('loadingScreen');
-            load.classList.add('opacity-0', 'pointer-events-none');
-            setTimeout(() => load.classList.add('hidden'), 700);
+            if (appLaunched) return;
+            appLaunched = true;
+
+            const loader = document.getElementById('loadingScreen');
+            loader.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => loader.classList.add('hidden'), 500);
             
             document.getElementById('mainApp').classList.remove('hidden');
             initSystem();
@@ -530,6 +522,7 @@
         }
 
         function initSystem() {
+            // Global Patient Listener
             onSnapshot(getPatientsColl(), (snap) => {
                 const list = [];
                 snap.forEach(d => list.push({ id: d.id, ...d.data() }));
@@ -541,6 +534,7 @@
                 updateUI();
             });
 
+            // Stats Listener
             onSnapshot(getVisitsColl(), (snap) => {
                 const visits = [];
                 snap.forEach(d => visits.push(d.data()));
@@ -567,14 +561,14 @@
         function renderLatest(list) {
             const body = document.getElementById('latest-table-body');
             if (!body) return;
-            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 italic font-black uppercase tracking-widest">No Recent Activity</td></tr>'; return; }
+            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black uppercase tracking-widest">No Recent Activity</td></tr>'; return; }
             body.innerHTML = list.map(p => `
                 <tr class="hover:bg-white/5 transition-colors group font-black">
                     <td class="px-10 py-6 text-slate-200">${p.name || '---'}</td>
                     <td class="px-10 py-6 text-center"><span class="bg-blue-600/10 text-blue-500 px-4 py-1.5 rounded-xl text-[10px] font-black border border-blue-600/20 uppercase tracking-widest">${p.bloodType}</span></td>
                     <td class="px-10 py-6 text-center text-slate-500 text-[11px] uppercase tracking-tighter">${p.createdAt ? new Date(p.createdAt.seconds*1000).toLocaleDateString('ar-EG') : 'Processing'}</td>
                     <td class="px-10 py-6 text-center">
-                        <button onclick="viewPatient('${p.id}')" class="p-4 bg-slate-900 rounded-2xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all shadow-xl active:scale-90">
+                        <button onclick="viewPatient('${p.id}')" class="p-4 bg-slate-900 rounded-2xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all shadow-xl">
                             <i data-lucide="navigation-2" class="w-5 h-5"></i>
                         </button>
                     </td>
@@ -586,7 +580,7 @@
         function renderFullList(list) {
             const body = document.getElementById('full-list-body');
             if (!body) return;
-            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black uppercase">No Data Found</td></tr>'; return; }
+            if (list.length === 0) { body.innerHTML = '<tr><td colspan="4" class="p-20 text-center text-slate-700 font-black">لا توجد نتائج</td></tr>'; return; }
             body.innerHTML = list.map(p => `
                 <tr class="hover:bg-white/5 transition-all group font-black border-b border-white/5">
                     <td class="px-10 py-8">
@@ -647,16 +641,15 @@
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
                         <div class="lg:col-span-4 space-y-10">
                             <div class="glass-card rounded-[4rem] p-12 shadow-2xl text-center border border-white/10 relative overflow-hidden">
-                                <div class="absolute inset-0 bg-blue-600/5 blur-3xl rounded-full"></div>
-                                <div id="qr-result" class="mx-auto mb-12 bg-white p-6 border-8 border-slate-950 rounded-[3rem] shadow-2xl inline-block relative z-10 transition-transform hover:scale-105 duration-500"></div>
-                                <h2 class="text-4xl font-black text-white leading-tight tracking-tight">${p.name || '---'}</h2>
+                                <div id="qr-result" class="mx-auto mb-12 bg-white p-6 border-8 border-slate-950 rounded-[3rem] shadow-2xl inline-block relative z-10"></div>
+                                <h2 class="text-4xl font-black text-white tracking-tight">${p.name || '---'}</h2>
                                 <p class="text-blue-500 font-black text-[10px] uppercase tracking-[0.5em] mt-5">ID: ${id}</p>
                                 <div class="grid grid-cols-2 gap-6 mt-12">
-                                    <div class="bg-white/5 p-6 rounded-[2.5rem] border border-white/5 shadow-inner">
+                                    <div class="bg-white/5 p-6 rounded-[2.5rem] border border-white/5">
                                         <p class="text-[10px] text-slate-500 font-black uppercase mb-2">Gender</p>
                                         <p class="text-lg font-black text-white uppercase">${p.gender}</p>
                                     </div>
-                                    <div class="bg-red-600/10 p-6 rounded-[2.5rem] border border-red-600/10 shadow-inner">
+                                    <div class="bg-red-600/10 p-6 rounded-[2.5rem] border border-red-600/10">
                                         <p class="text-[10px] text-red-400 font-black uppercase mb-2">Blood</p>
                                         <p class="text-lg font-black text-red-500 uppercase">${p.bloodType}</p>
                                     </div>
@@ -667,29 +660,29 @@
                             <div class="glass-card rounded-[4rem] p-10 lg:p-16 border border-white/10 shadow-2xl">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-8 mb-16">
                                     <div class="flex items-center gap-5">
-                                        <div class="w-3 h-12 bg-blue-600 rounded-full shadow-lg shadow-blue-600/50"></div>
-                                        <h3 class="text-3xl font-black text-white tracking-tight uppercase">Medical History</h3>
+                                        <div class="w-3 h-12 bg-blue-600 rounded-full"></div>
+                                        <h3 class="text-3xl font-black text-white tracking-tight">التاريخ الطبي</h3>
                                     </div>
-                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-6 rounded-[2rem] font-black shadow-2xl active:scale-95 hover:bg-blue-700 transition-all text-sm uppercase tracking-widest">
-                                        + Record Visit
+                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-10 py-6 rounded-[2rem] font-black shadow-2xl active:scale-95 text-sm uppercase">
+                                        + إضافة زيارة
                                     </button>
                                 </div>
                                 <div class="space-y-8">
                                     ${visits.length === 0 ? '<div class="text-center py-24 text-slate-800 font-black tracking-[0.5em] uppercase italic opacity-50">No Data Synchronized</div>' : ''}
                                     ${visits.map(v => `
-                                        <div class="p-10 bg-white/5 rounded-[3rem] border-r-[12px] border-blue-600 hover:bg-white/10 transition-all group relative shadow-2xl">
+                                        <div class="p-10 bg-white/5 rounded-[3rem] border-r-[12px] border-blue-600 shadow-2xl">
                                             <div class="flex justify-between items-start mb-6">
                                                 <div class="space-y-2">
-                                                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Chief Physician</p>
-                                                    <p class="text-xl font-black text-white tracking-tight">${v.doctorName || 'GENERAL DIRECTOR'}</p>
+                                                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">الطبيب المعالج</p>
+                                                    <p class="text-xl font-black text-white tracking-tight">${v.doctorName || 'المدير العام'}</p>
                                                 </div>
-                                                <span class="px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] ${v.status === 'طوارئ' ? 'bg-red-600 text-white shadow-2xl shadow-red-900/50 animate-pulse' : 'bg-blue-600/20 text-blue-400 border border-blue-600/20 shadow-inner'}">${v.status}</span>
+                                                <span class="px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] ${v.status === 'طوارئ' ? 'bg-red-600 text-white shadow-2xl' : 'bg-blue-600/20 text-blue-400 border border-blue-600/20'}">${v.status}</span>
                                             </div>
                                             <div class="p-8 bg-slate-950 rounded-[2rem] border border-white/5 shadow-inner">
                                                 <p class="text-slate-300 font-black leading-relaxed text-lg">${v.diagnosis}</p>
                                             </div>
-                                            <div class="mt-6 text-[10px] font-black text-slate-600 flex items-center gap-3 uppercase tracking-widest">
-                                                <i data-lucide="history" class="w-4 h-4"></i> TIMESTAMP: ${v.visitDate}
+                                            <div class="mt-6 text-[10px] font-black text-slate-600 flex items-center gap-3 uppercase">
+                                                <i data-lucide="history" class="w-4 h-4"></i> تاريخ الزيارة: ${v.visitDate}
                                             </div>
                                         </div>
                                     `).join('')}
@@ -734,10 +727,10 @@
                     phone: f.get('phone'), bloodType: f.get('bloodType'), notes: f.get('notes'),
                     createdAt: serverTimestamp()
                 });
-                showToast("Identity Synchronized Successfully!");
+                showToast("تم مزامنة البيانات بنجاح!");
                 e.target.reset();
                 await viewPatient(docRef.id);
-            } catch (err) { showToast("Cloud Write Failed!"); } 
+            } catch (err) { showToast("فشل الحفظ السحابي!"); } 
             finally {
                 btn.disabled = false;
                 btn.innerHTML = orig;
@@ -760,14 +753,14 @@
             const pid = f.get('patientId');
             try {
                 await addDoc(getVisitsColl(), {
-                    patientId: pid, doctorName: "GENERAL DIRECTOR",
+                    patientId: pid, doctorName: "المدير العام",
                     diagnosis: f.get('diagnosis'), status: f.get('status'),
                     visitDate: f.get('visitDate'), createdAt: serverTimestamp()
                 });
-                showToast("Medical Record Updated!");
+                showToast("تم تحديث السجل الطبي!");
                 closeModal('visitModal');
                 await viewPatient(pid);
-            } catch (err) { showToast("Update Failed!"); }
+            } catch (err) { showToast("فشل التحديث!"); }
         };
 
         function showToast(msg) {
