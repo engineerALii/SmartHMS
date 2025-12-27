@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart HMS - نظام إدارة المستشفى الذكي</title>
+    
+    <!-- الأيقونات والروابط للمنصات المختلفة (Logo Integration) -->
+    <link rel="icon" type="image/png" href="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
+    <link rel="apple-touch-icon" href="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
+    <meta name="apple-mobile-web-app-title" content="SmartHMS">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="msapplication-TileImage" content="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
+    <link rel="shortcut icon" href="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- المكتبات الخارجية -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f1f5f9; }
+        .nav-active { background-color: #3b82f6; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #reader { border: none !important; border-radius: 1.5rem; overflow: hidden; width: 100% !important; background: #000; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #sidebar { transition: transform 0.3s ease-in-out; }
+        @media (max-width: 1024px) { #sidebar.closed { transform: translateX(100%); } }
+        
+        input, select, textarea, button { font-size: 16px !important; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 overflow-hidden">
+
+    <!-- شاشة تسجيل الدخول (Admin Login) -->
+    <div id="adminLoginScreen" class="fixed inset-0 bg-slate-900/95 z-[110] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 lg:p-12 shadow-2xl text-center space-y-6 border border-slate-100">
+            <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
+                 class="w-24 h-24 mx-auto rounded-3xl shadow-xl border-4 border-blue-50" alt="Hospital Logo">
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">الدخول الآمن للنظام</h2>
+                <p class="text-slate-400 text-sm font-medium">يرجى إدخال كلمة المرور للمتابعة</p>
+            </div>
+            <div class="space-y-4">
+                <input type="password" id="adminPassword" 
+                       class="w-full p-5 bg-slate-50 border border-slate-200 rounded-3xl text-center text-3xl tracking-[0.5em] focus:ring-4 focus:ring-blue-100 outline-none transition-all placeholder:tracking-normal placeholder:text-base"
+                       placeholder="••••">
+                <button id="loginBtn" onclick="checkAdminAuth()" 
+                        class="w-full py-5 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-2xl shadow-blue-200 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="shield-check"></i>
+                    دخول للنظام
+                </button>
+            </div>
+            <p id="authError" class="text-red-500 text-sm font-bold hidden bg-red-50 py-2 rounded-xl">⚠️ كلمة المرور غير صحيحة!</p>
+        </div>
+    </div>
+
+    <!-- شاشة التحميل -->
+    <div id="loadingScreen" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center transition-all duration-500 hidden">
+        <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
+             class="w-24 h-24 mb-6 rounded-3xl animate-pulse shadow-2xl border-2 border-blue-50" alt="Logo">
+        <div class="w-12 h-12 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+        <h1 class="text-xl font-bold text-blue-600 font-black tracking-tighter">Smart HMS</h1>
+        <p id="loadingStatus" class="text-slate-400 text-sm mt-2 font-bold uppercase tracking-widest">مزامنة البيانات السحابية...</p>
+    </div>
+
+    <!-- الحاوية الرئيسية -->
+    <div id="mainApp" class="hidden flex flex-col lg:flex-row h-screen overflow-hidden">
+        
+        <!-- القائمة الجانبية -->
+        <aside id="sidebar" class="fixed lg:relative top-0 right-0 h-full w-72 bg-white border-l border-slate-200 flex flex-col z-50 closed lg:translate-x-0 shadow-2xl lg:shadow-none">
+            <div class="p-6 lg:p-8 border-b border-slate-50 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
+                         class="w-10 h-10 rounded-xl shadow-sm border border-slate-100" alt="Hospital Icon">
+                    <span class="font-black text-xl lg:text-2xl text-slate-800 tracking-tighter">Smart<span class="text-blue-600">HMS</span></span>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 lg:space-y-2 overflow-y-auto custom-scrollbar">
+                <div class="px-4 py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">القائمة الرئيسية</div>
+                <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-[1.5rem] text-slate-600 hover:bg-slate-50 transition-all nav-active">
+                    <i data-lucide="layout-grid"></i>
+                    <span class="font-bold">لوحة التحكم</span>
+                </button>
+                <button onclick="switchView('patients')" id="nav-patients" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-[1.5rem] text-slate-600 hover:bg-slate-50 transition-all">
+                    <i data-lucide="users"></i>
+                    <span class="font-bold">قائمة المرضى</span>
+                </button>
+                <button onclick="switchView('add')" id="nav-add" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-[1.5rem] text-slate-600 hover:bg-slate-50 transition-all">
+                    <i data-lucide="user-plus"></i>
+                    <span class="font-bold">إضافة مريض</span>
+                </button>
+                <button onclick="switchView('scan')" id="nav-scan" class="nav-btn w-full flex items-center gap-4 px-4 py-4 rounded-[1.5rem] text-slate-600 hover:bg-slate-50 transition-all">
+                    <i data-lucide="qr-code"></i>
+                    <span class="font-bold">مسح QR Code</span>
+                </button>
+            </nav>
+
+            <div class="p-6 border-t border-slate-50 bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center text-blue-600 font-bold text-sm">AD</div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-sm font-bold truncate">المدير العام</p>
+                        <p class="text-[9px] text-green-500 font-bold uppercase">متصل بالنظام</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- منطقة المحتوى الرئيسية -->
+        <main class="flex-1 h-full overflow-y-auto bg-slate-50 custom-scrollbar relative">
+            
+            <header class="p-4 lg:p-8 flex justify-between items-center sticky top-0 bg-slate-50/80 backdrop-blur-md z-40">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="lg:hidden p-3 bg-white border border-slate-100 rounded-2xl text-slate-600 shadow-sm">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div id="viewTitle">
+                        <h2 class="text-lg lg:text-2xl font-black text-slate-800">لوحة التحكم</h2>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 relative">
+                    <button onclick="toggleNotifications()" id="notifBell" class="w-10 h-10 lg:w-12 lg:h-12 bg-white rounded-xl lg:rounded-2xl border border-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-all relative">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="notifBadge" class="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    
+                    <div id="notificationsDropdown" class="absolute top-full left-0 mt-4 w-72 bg-white rounded-3xl shadow-2xl border border-slate-100 p-4 hidden animate-in slide-in-from-top-4 duration-300 z-50">
+                        <span class="font-black text-sm text-slate-800 px-2 block mb-3 border-b border-slate-50 pb-2">التنبيهات</span>
+                        <div class="space-y-2" id="notif-container">
+                            <div class="p-3 bg-blue-50 rounded-2xl text-[11px] font-bold text-blue-700 flex items-center gap-2">
+                                <i data-lucide="info" class="w-4 h-4"></i>
+                                النظام متصل بالسحابة بنجاح
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="px-4 lg:px-8 pb-8 space-y-6">
+                
+                <!-- لوحة التحكم -->
+                <div id="view-dashboard" class="view-content fade-in space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-6">
+                            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600"><i data-lucide="users"></i></div>
+                            <div>
+                                <p class="text-slate-400 text-[10px] font-black uppercase">إجمالي المرضى</p>
+                                <p class="text-2xl lg:text-3xl font-black text-slate-800" id="count-patients">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-6">
+                            <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600"><i data-lucide="stethoscope"></i></div>
+                            <div>
+                                <p class="text-slate-400 text-[10px] font-black uppercase">زيارات اليوم</p>
+                                <p class="text-2xl lg:text-3xl font-black text-slate-800" id="count-visits">0</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-6 sm:col-span-2 lg:col-span-1">
+                            <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-red-600"><i data-lucide="alert-circle"></i></div>
+                            <div>
+                                <p class="text-slate-400 text-[10px] font-black uppercase">حالات الطوارئ</p>
+                                <p class="text-2xl lg:text-3xl font-black text-slate-800" id="count-emergency">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="p-6 border-b border-slate-50 flex justify-between items-center">
+                            <h3 class="font-bold">أحدث المرضى</h3>
+                            <button onclick="switchView('patients')" class="text-blue-600 text-xs font-bold hover:underline">عرض الكل</button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right whitespace-nowrap font-bold">
+                                <thead class="bg-slate-50/50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                                    <tr>
+                                        <th class="px-6 py-4">المريض</th>
+                                        <th class="px-6 py-4 text-center">الفصيلة</th>
+                                        <th class="px-6 py-4 text-center">الحالة</th>
+                                        <th class="px-4 py-4 text-center">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="latest-table-body" class="divide-y divide-slate-50 font-bold">
+                                    <tr><td colspan="4" class="p-10 text-center text-slate-300 font-bold tracking-widest">جاري تحميل البيانات...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- قائمة المرضى -->
+                <div id="view-patients" class="view-content fade-in hidden space-y-6">
+                    <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
+                        <div class="relative w-full">
+                            <i data-lucide="search" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5"></i>
+                            <input type="text" id="patientSearch" placeholder="بحث باسم المريض أو الجوال..." class="w-full pr-12 pl-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm font-bold">
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right whitespace-nowrap font-bold">
+                                <thead class="bg-slate-50/50 text-slate-400 text-[10px] font-black uppercase">
+                                    <tr>
+                                        <th class="px-6 py-4">الاسم والباركود</th>
+                                        <th class="px-6 py-4">الجوال</th>
+                                        <th class="px-6 py-4 text-center">العمر</th>
+                                        <th class="px-4 py-4 text-center">إجراء</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="full-list-body" class="divide-y divide-slate-50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- إضافة مريض -->
+                <div id="view-add" class="view-content fade-in hidden">
+                    <div class="max-w-3xl mx-auto bg-white p-8 lg:p-12 rounded-[3rem] border border-slate-100 shadow-2xl">
+                        <div class="text-center mb-10">
+                            <h3 class="text-2xl font-black text-slate-800 tracking-tight">إضافة سجل طبي جديد</h3>
+                            <p class="text-slate-400 text-sm mt-1 font-bold">تعبئة البيانات الأساسية للمريض لبدء المتابعة</p>
+                        </div>
+                        <form id="addPatientForm" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-slate-600 mr-1">اسم المريض الرباعي</label>
+                                    <input type="text" name="name" required class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold" placeholder="أدخل الاسم كاملاً">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-600 mr-1">العمر</label>
+                                        <input type="number" name="age" required class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold" placeholder="00">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="block text-xs font-black text-slate-600 mr-1">الجنس</label>
+                                        <select name="gender" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold">
+                                            <option value="ذكر">ذكر</option>
+                                            <option value="أنثى">أنثى</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-slate-600 mr-1">رقم الجوال</label>
+                                    <input type="tel" name="phone" required class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold" placeholder="05XXXXXXXX">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="block text-xs font-black text-slate-600 mr-1">فصيلة الدم</label>
+                                    <select name="bloodType" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold">
+                                        <option value="A+">A+</option><option value="O+">O+</option><option value="B+">B+</option><option value="AB+">AB+</option>
+                                        <option value="A-">A-</option><option value="O-">O-</option><option value="B-">B-</option><option value="AB-">AB-</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-xs font-black text-slate-600 mr-1">ملاحظات طبية (حساسية، أمراض...)</label>
+                                <textarea name="notes" rows="3" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-bold" placeholder="اختياري..."></textarea>
+                            </div>
+                            <button type="submit" id="saveBtn" class="w-full py-5 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-2xl shadow-blue-100 transition-all flex items-center justify-center gap-3 text-lg cursor-pointer">
+                                <i data-lucide="plus-circle"></i>
+                                <span>حفظ سجل المريض</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- مسح الباركود -->
+                <div id="view-scan" class="view-content fade-in hidden">
+                    <div class="max-w-xl mx-auto text-center space-y-6">
+                        <div class="bg-white p-8 lg:p-12 rounded-[3.5rem] border border-slate-100 shadow-2xl">
+                            <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-inner">
+                                <i data-lucide="scan-line" class="w-10 h-10"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800">مسح الرمز الطبي</h3>
+                            <p class="text-slate-400 text-sm mt-1 mb-8 font-bold">وجه الكاميرا نحو كود سوار المريض</p>
+                            
+                            <div class="relative rounded-[2rem] overflow-hidden border-[10px] border-slate-50 aspect-square shadow-2xl bg-black">
+                                <div id="reader"></div>
+                            </div>
+                            
+                            <div id="scanStatus" class="mt-8 text-[11px] font-black text-blue-400 uppercase tracking-widest animate-pulse">جاري تشغيل الماسح الضوئي...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تفاصيل المريض -->
+                <div id="view-details" class="view-content fade-in hidden">
+                    <div id="details-container" class="space-y-6"></div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- نافذة إضافة زيارة -->
+    <div id="visitModal" class="fixed inset-0 bg-slate-900/60 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-lg p-8 lg:p-12 shadow-2xl space-y-8 transition-all">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-black text-slate-800">إضافة تشخيص</h3>
+                <button onclick="closeModal('visitModal')" class="text-slate-300 hover:text-slate-600 transition-colors"><i data-lucide="x-circle"></i></button>
+            </div>
+            <form id="addVisitForm" class="space-y-6">
+                <input type="hidden" name="patientId">
+                <div class="space-y-1">
+                    <label class="block text-xs font-black text-slate-600">التشخيص الطبي</label>
+                    <textarea name="diagnosis" required rows="3" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-bold" placeholder="وصف حالة المريض"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-600">الحالة</label>
+                        <select name="status" class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm font-bold">
+                            <option value="مستقر">مستقر</option>
+                            <option value="مراجعة">مراجعة</option>
+                            <option value="طوارئ">طوارئ</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-xs font-black text-slate-600">التاريخ</label>
+                        <input type="date" name="visitDate" required class="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none text-sm font-bold">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-5 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 shadow-xl transition-all">حفظ البيانات</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- التنبيهات المنبثقة -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-8 py-4 rounded-3xl shadow-2xl transform translate-y-32 opacity-0 transition-all duration-300 z-[120] flex items-center gap-4">
+        <div class="w-8 h-8 bg-blue-500 rounded-xl flex items-center justify-center shrink-0"><i data-lucide="check" class="w-4 h-4"></i></div>
+        <span id="toastMsg" class="font-bold text-sm"></span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Config ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyD6MRZ7d7J1333erYoBrUGqocJNdGNjB7w",
+            authDomain: "neew-aec2b.firebaseapp.com",
+            projectId: "neew-aec2b",
+            storageBucket: "neew-aec2b.firebasestorage.app",
+            messagingSenderId: "70112873200",
+            appId: "1:70112873200:web:b8ef2b3863be6f1bf39035"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-hms-pro';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const getPatientsColl = () => collection(db, 'artifacts', appId, 'public', 'data', 'patients');
+        const getVisitsColl = () => collection(db, 'artifacts', appId, 'public', 'data', 'visits');
+
+        window.allPatients = [];
+        window.qrScanner = null;
+        window.scannerLock = false;
+
+        // --- Interface Control ---
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.toggle('closed');
+            if (overlay) overlay.classList.toggle('hidden');
+        };
+
+        window.toggleNotifications = () => {
+            const dropdown = document.getElementById('notificationsDropdown');
+            if (dropdown) dropdown.classList.toggle('hidden');
+        };
+
+        // Admin Auth
+        window.checkAdminAuth = () => {
+            const pass = document.getElementById('adminPassword').value;
+            const error = document.getElementById('authError');
+            if (pass === 'alikuka') {
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<div class="loader !border-t-white mx-auto !w-6 !h-6"></div>';
+                document.getElementById('adminLoginScreen').classList.add('hidden');
+                document.getElementById('loadingScreen').classList.remove('hidden');
+                startAuth(0);
+            } else {
+                if (error) {
+                    error.classList.remove('hidden');
+                    setTimeout(() => error.classList.add('hidden'), 2000);
+                }
+            }
+        };
+
+        async function startAuth(retryCount = 0) {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) {
+                if (retryCount < 5) {
+                    setTimeout(() => startAuth(retryCount + 1), 2000);
+                } else {
+                    document.getElementById('loadingStatus').innerText = "فشل الاتصال، تحقق من الإنترنت.";
+                }
+            }
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('loadingScreen').classList.add('opacity-0', 'pointer-events-none');
+                document.getElementById('mainApp').classList.remove('hidden');
+                initSystem();
+                lucide.createIcons();
+            }
+        });
+
+        // Data Sync
+        function initSystem() {
+            onSnapshot(getPatientsColl(), (snap) => {
+                const list = [];
+                snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                list.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                window.allPatients = list;
+                
+                const countEl = document.getElementById('count-patients');
+                if (countEl) countEl.innerText = list.length;
+                
+                renderLatest(list.slice(0, 5));
+                renderFullList(list);
+            });
+
+            onSnapshot(getVisitsColl(), (snap) => {
+                const visits = [];
+                snap.forEach(d => visits.push(d.data()));
+                const countV = document.getElementById('count-visits');
+                const countE = document.getElementById('count-emergency');
+                if (countV) countV.innerText = visits.length;
+                if (countE) countE.innerText = visits.filter(v => v.status === 'طوارئ').length;
+            });
+
+            const searchInput = document.getElementById('patientSearch');
+            if (searchInput) {
+                searchInput.oninput = (e) => {
+                    const q = e.target.value.toLowerCase();
+                    const filtered = window.allPatients.filter(p => 
+                        (p.name && p.name.toLowerCase().includes(q)) || 
+                        (p.phone && p.phone.includes(q)) ||
+                        (p.id && p.id.toLowerCase().includes(q))
+                    );
+                    renderFullList(filtered);
+                };
+            }
+        }
+
+        function renderLatest(list) {
+            const body = document.getElementById('latest-table-body');
+            if (!body) return;
+            if (list.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-300 font-bold">لا يوجد سجلات حالية</td></tr>';
+                return;
+            }
+            body.innerHTML = list.map(p => `
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4"><div class="text-slate-800 text-sm font-bold">${p.name || 'بدون اسم'}</div></td>
+                    <td class="px-6 py-4 text-center"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-lg text-[10px] font-black">${p.bloodType}</span></td>
+                    <td class="px-6 py-4 text-center"><div class="flex justify-center"><div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div></div></td>
+                    <td class="px-4 py-4 text-center">
+                        <button onclick="viewPatient('${p.id}')" class="p-2 text-blue-600 hover:bg-blue-100 rounded-xl transition-all">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderFullList(list) {
+            const body = document.getElementById('full-list-body');
+            if (!body) return;
+            if (list.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-slate-300">لا توجد نتائج بحث مطابقة</td></tr>';
+                return;
+            }
+            body.innerHTML = list.map(p => `
+                <tr class="hover:bg-slate-50 transition-colors group">
+                    <td class="px-6 py-5">
+                        <div class="text-slate-800 text-sm font-bold">${p.name || 'بدون اسم'}</div>
+                        <div class="text-[9px] text-slate-300 font-mono tracking-tighter uppercase font-bold">${p.id}</div>
+                    </td>
+                    <td class="px-6 py-5 text-slate-500 text-xs tracking-tight font-bold">${p.phone || 'N/A'}</td>
+                    <td class="px-6 py-5 text-center text-xs font-bold">${p.age || '0'} سنة</td>
+                    <td class="px-4 py-5 text-center">
+                        <button onclick="viewPatient('${p.id}')" class="bg-blue-50 text-blue-600 p-2.5 rounded-xl hover:bg-blue-600 hover:text-white transition-all inline-flex items-center justify-center">
+                            <i data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Navigation
+        window.switchView = async (id) => {
+            if (id !== 'scan') await stopScanner();
+
+            document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
+            const target = document.getElementById(`view-${id}`);
+            if (target) target.classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
+            const activeBtn = document.getElementById(`nav-${id}`);
+            if (activeBtn) activeBtn.classList.add('nav-active');
+
+            const titleMap = { 'dashboard': 'لوحة التحكم', 'patients': 'إدارة المرضى', 'add': 'إضافة مريض', 'scan': 'مسح الرمز الطبي', 'details': 'ملف المريض' };
+            const titleEl = document.querySelector('#viewTitle h2');
+            if (titleEl) titleEl.innerText = titleMap[id] || 'التفاصيل';
+
+            if (window.innerWidth < 1024) toggleSidebar();
+            if (id === 'scan') setTimeout(startScanner, 400);
+            lucide.createIcons();
+        };
+
+        window.viewPatient = async (id) => {
+            await switchView('details');
+            const p = window.allPatients.find(item => item.id === id);
+            if (!p) {
+                const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'patients', id));
+                if (snap.exists()) renderDetails(id, snap.data());
+                else showToast("المريض غير موجود!");
+            } else {
+                renderDetails(id, p);
+            }
+        };
+
+        async function renderDetails(id, p) {
+            const vSnap = await getDocs(getVisitsColl());
+            const visits = [];
+            vSnap.forEach(v => { 
+                const data = v.data();
+                if (data.patientId === id) visits.push(data); 
+            });
+            visits.sort((a,b) => new Date(b.visitDate) - new Date(a.visitDate));
+
+            const container = document.getElementById('details-container');
+            if (container) {
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-1 space-y-6">
+                            <div class="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-xl text-center">
+                                <div id="qr-result" class="mx-auto mb-6 bg-white p-4 border rounded-2xl shadow-inner inline-block"></div>
+                                <h2 class="text-xl lg:text-2xl font-black text-slate-800">${p.name || 'بدون اسم'}</h2>
+                                <p class="text-blue-600 font-bold text-xs uppercase mt-1">ID: ${id}</p>
+                                <div class="grid grid-cols-2 gap-3 mt-6">
+                                    <div class="bg-slate-50 p-3 rounded-2xl">
+                                        <p class="text-[9px] text-slate-400 font-black uppercase">الجنس</p>
+                                        <p class="text-sm font-bold">${p.gender || 'N/A'}</p>
+                                    </div>
+                                    <div class="bg-red-50 p-3 rounded-2xl">
+                                        <p class="text-[9px] text-red-300 font-black uppercase font-bold">فصيلة الدم</p>
+                                        <p class="text-sm font-bold text-red-600">${p.bloodType || 'N/A'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-4">
+                                <div class="flex justify-between items-center py-2 border-b border-slate-50 text-xs font-bold">
+                                    <span class="text-slate-400">الجوال:</span>
+                                    <span>${p.phone || 'N/A'}</span>
+                                </div>
+                                <div class="bg-amber-50 p-4 rounded-xl text-xs font-bold text-amber-800 italic">
+                                    ${p.notes || 'لا يوجد ملاحظات طبية سابقة.'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white rounded-[2rem] p-6 lg:p-10 border border-slate-100 shadow-sm">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                                    <h3 class="text-lg font-black">السجل الطبي والزيارات</h3>
+                                    <button onclick="openVisitModal('${id}')" class="w-full sm:w-auto bg-blue-600 text-white px-6 py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 text-sm">إضافة تشخيص</button>
+                                </div>
+                                <div class="space-y-4 font-bold">
+                                    ${visits.length === 0 ? '<p class="text-center py-10 text-slate-400">لا توجد زيارات سابقة.</p>' : ''}
+                                    ${visits.map(v => `
+                                        <div class="p-5 bg-slate-50 rounded-2xl border-r-4 border-blue-500">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <p class="text-xs font-black text-slate-800">د. ${v.doctorName || 'المدير العام'}</p>
+                                                <span class="px-2 py-0.5 rounded text-[9px] font-black ${v.status === 'طوارئ' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}">${v.status}</span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 leading-relaxed font-bold">${v.diagnosis || 'بدون تشخيص'}</p>
+                                            <p class="text-[9px] text-slate-400 mt-2 font-black">${v.visitDate}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                new QRCode(document.getElementById("qr-result"), { text: id, width: 140, height: 140 });
+            }
+            lucide.createIcons();
+        }
+
+        // Scanner Logic
+        async function startScanner() {
+            if (window.scannerLock) return;
+            window.scannerLock = true;
+            try {
+                if (!window.qrScanner) window.qrScanner = new Html5Qrcode("reader");
+                const state = window.qrScanner.getState();
+                if (state === 1) { 
+                    await window.qrScanner.start({ facingMode: "environment" }, { fps: 15, qrbox: 280 }, 
+                        async (txt) => { await stopScanner(); await viewPatient(txt); }, () => {});
+                }
+            } catch (err) { console.error(err); } finally { window.scannerLock = false; }
+        }
+
+        async function stopScanner() {
+            if (!window.qrScanner) return;
+            try {
+                const state = window.qrScanner.getState();
+                if (state === 2 || state === 3) await window.qrScanner.stop();
+            } catch (err) { console.warn(err); }
+        }
+
+        // --- FORM FIX (Re-enabling the button) ---
+        document.getElementById('addPatientForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            const originalHTML = btn.innerHTML;
+            
+            // 1. Disable and show loader
+            btn.disabled = true;
+            btn.style.opacity = "0.7";
+            btn.innerHTML = '<div class="loader !border-t-white mx-auto !w-6 !h-6"></div>';
+
+            const f = new FormData(e.target);
+            try {
+                // 2. Perform database operation
+                const docRef = await addDoc(getPatientsColl(), {
+                    name: f.get('name'), age: parseInt(f.get('age')), gender: f.get('gender'),
+                    phone: f.get('phone'), bloodType: f.get('bloodType'), notes: f.get('notes'),
+                    createdAt: serverTimestamp()
+                });
+                
+                showToast("تم الحفظ بنجاح!");
+                e.target.reset();
+                
+                // 3. Move to patient view
+                await viewPatient(docRef.id);
+            } catch (err) { 
+                console.error(err);
+                showToast("حدث خطأ أثناء الحفظ! تأكد من الاتصال."); 
+            } finally {
+                // 4. CRITICAL: Always re-enable button
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.innerHTML = originalHTML;
+                lucide.createIcons();
+            }
+        };
+
+        window.openVisitModal = (pid) => {
+            const f = document.getElementById('addVisitForm');
+            f.querySelector('[name="patientId"]').value = pid;
+            f.querySelector('[name="visitDate"]').valueAsDate = new Date();
+            document.getElementById('visitModal').classList.remove('hidden');
+        };
+
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        document.getElementById('addVisitForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const f = new FormData(e.target);
+            const pid = f.get('patientId');
+            try {
+                await addDoc(getVisitsColl(), {
+                    patientId: pid, doctorName: "المدير العام",
+                    diagnosis: f.get('diagnosis'), status: f.get('status'),
+                    visitDate: f.get('visitDate'), createdAt: serverTimestamp()
+                });
+                showToast("تم تسجيل الزيارة بنجاح");
+                closeModal('visitModal');
+                await viewPatient(pid);
+            } catch (err) { showToast("فشل في إضافة التشخيص!"); }
+        };
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            t.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-32', 'opacity-0'), 3000);
+        }
+    </script>
+</body>
+</html>
