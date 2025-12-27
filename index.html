@@ -49,7 +49,6 @@
         .loader { border: 3px solid #1e293b; border-top: 3px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* تحسين ظهور مربع الكاميرا بالكامل */
         #reader { 
             border: none !important; 
             border-radius: 1.5rem; 
@@ -65,7 +64,6 @@
             height: 100% !important;
             object-fit: cover !important; 
         }
-        /* معالجة أي عناصر إضافية تحقنها المكتبة */
         #reader__dashboard, #reader__status_span { display: none !important; }
 
         .view-transition { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -116,7 +114,7 @@
         <img src="https://www.dropbox.com/scl/fi/a1vn4vwfoc89fuhu0o7v9/IMG_0224.PNG?rlkey=owf2gmzcq4h6ozp1ct8mtdzgs&st=23a9v4r4&dl=1" 
              class="w-24 h-24 mb-8 rounded-3xl animate-pulse shadow-2xl border-2 border-blue-500/30" alt="Logo">
         <div class="w-10 h-10 border-4 border-slate-800 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-        <p id="loadingStatus" class="text-slate-400 text-sm font-bold uppercase tracking-widest">جارِ مزامنة السحابة...</p>
+        <p id="loadingStatus" class="text-slate-400 text-sm font-bold uppercase tracking-widest text-center px-4">جارِ مزامنة السحابة...</p>
     </div>
 
     <!-- واجهة النظام الرئيسية -->
@@ -190,7 +188,6 @@
                         <span id="notifBadge" class="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full border-2 border-slate-950"></span>
                     </button>
                     
-                    <!-- التنبيهات -->
                     <div id="notificationsDropdown" class="absolute top-full left-0 mt-4 w-80 glass rounded-[2rem] shadow-2xl p-5 hidden animate-in slide-in-from-top-5 duration-300 z-50">
                         <div class="flex justify-between items-center mb-4 border-b border-white/5 pb-3">
                             <span class="font-black text-sm text-white">التنبيهات</span>
@@ -211,7 +208,6 @@
 
             <div class="p-5 lg:p-10 flex-1">
                 
-                <!-- محتوى لوحة التحكم -->
                 <div id="view-dashboard" class="view-content view-transition space-y-8">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                         <div class="glass p-8 rounded-[2.5rem] flex items-center gap-8 group hover:border-blue-500/30 transition-all duration-300">
@@ -265,7 +261,6 @@
                     </div>
                 </div>
 
-                <!-- قائمة المرضى الشاملة -->
                 <div id="view-patients" class="view-content view-transition hidden space-y-8">
                     <div class="glass p-6 rounded-3xl border border-white/5 shadow-2xl">
                         <div class="relative w-full">
@@ -291,7 +286,6 @@
                     </div>
                 </div>
 
-                <!-- إضافة مريض جديد -->
                 <div id="view-add" class="view-content view-transition hidden">
                     <div class="max-w-4xl mx-auto glass p-8 lg:p-14 rounded-[4rem] border border-white/5 shadow-2xl relative overflow-hidden">
                         <div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-600/10 rounded-full blur-[100px]"></div>
@@ -347,7 +341,6 @@
                     </div>
                 </div>
 
-                <!-- مسح الباركود -->
                 <div id="view-scan" class="view-content view-transition hidden">
                     <div class="max-w-xl mx-auto text-center space-y-10">
                         <div class="glass p-8 lg:p-14 rounded-[4rem] border border-white/10 shadow-2xl relative">
@@ -358,7 +351,6 @@
                             <h3 class="text-3xl font-black text-white tracking-tight">ماسح الهوية الطبية</h3>
                             <p class="text-slate-500 text-sm mt-3 mb-10 font-bold leading-relaxed uppercase tracking-widest">وجه الكاميرا نحو الكود المسجل في سوار المريض</p>
                             
-                            <!-- حاوية الكاميرا المحسنة -->
                             <div class="relative rounded-[2.5rem] overflow-hidden border-[12px] border-slate-900 aspect-square shadow-2xl bg-black group max-w-[400px] mx-auto">
                                 <div id="reader" class="w-full h-full"></div>
                                 <div class="absolute inset-0 border-[2px] border-blue-500/50 rounded-[2.5rem] pointer-events-none animate-pulse"></div>
@@ -369,7 +361,6 @@
                     </div>
                 </div>
 
-                <!-- تفاصيل المريض -->
                 <div id="view-details" class="view-content view-transition hidden">
                     <div id="details-container" class="space-y-8 pb-10"></div>
                 </div>
@@ -437,6 +428,7 @@
         window.allPatients = [];
         window.qrScanner = null;
         window.scannerLock = false;
+        let isFirebaseAuthenticated = false;
 
         // --- Interface Control ---
         window.toggleSidebar = () => {
@@ -450,19 +442,32 @@
             document.getElementById('notificationsDropdown')?.classList.toggle('hidden');
         };
 
+        // --- Admin Authentication & App Launch ---
         window.checkAdminAuth = () => {
-            const pass = document.getElementById('adminPassword').value;
+            const passInput = document.getElementById('adminPassword');
+            const pass = passInput.value;
+            const loginBtn = document.getElementById('loginBtn');
+            const originalHTML = loginBtn.innerHTML;
+
             if (pass === 'alikuka') {
-                const btn = document.getElementById('loginBtn');
-                btn.disabled = true;
-                btn.innerHTML = '<div class="loader !border-t-white mx-auto !w-6 !h-6"></div>';
-                document.getElementById('adminLoginScreen').classList.add('hidden');
-                document.getElementById('loadingScreen').classList.remove('hidden');
-                startAuth(0);
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<div class="loader !border-t-white mx-auto !w-6 !h-6"></div>';
+                
+                // بدء المصادقة السحابية
+                startAuth(0).then(() => {
+                    document.getElementById('adminLoginScreen').classList.add('hidden');
+                    // إذا كان Firebase قد انتهى بالفعل من الاتصال، أظهر التطبيق فوراً
+                    if (isFirebaseAuthenticated) {
+                        launchApp();
+                    } else {
+                        document.getElementById('loadingScreen').classList.remove('hidden');
+                    }
+                });
             } else {
                 const err = document.getElementById('authError');
                 err.classList.remove('hidden');
                 setTimeout(() => err.classList.add('hidden'), 3000);
+                passInput.value = '';
             }
         };
 
@@ -474,19 +479,30 @@
                     await signInAnonymously(auth);
                 }
             } catch (err) {
+                console.error("Auth error:", err);
                 if (retry < 5) setTimeout(() => startAuth(retry + 1), 2000);
-                else document.getElementById('loadingStatus').innerText = "خطأ في الشبكة..";
             }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('loadingScreen').classList.add('opacity-0', 'pointer-events-none');
-                document.getElementById('mainApp').classList.remove('hidden');
-                initSystem();
-                lucide.createIcons();
+                isFirebaseAuthenticated = true;
+                // إذا كانت شاشة الدخول مخفية (أي أن الباسورد تم إدخاله بنجاح)، أظهر التطبيق
+                if (document.getElementById('adminLoginScreen').classList.contains('hidden')) {
+                    launchApp();
+                }
             }
         });
+
+        function launchApp() {
+            document.getElementById('loadingScreen').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                document.getElementById('loadingScreen').classList.add('hidden');
+            }, 500);
+            document.getElementById('mainApp').classList.remove('hidden');
+            initSystem();
+            lucide.createIcons();
+        }
 
         function initSystem() {
             onSnapshot(getPatientsColl(), (snap) => {
@@ -514,7 +530,7 @@
         }
 
         function updateUILists() {
-            const q = document.getElementById('patientSearch').value.toLowerCase();
+            const q = document.getElementById('patientSearch')?.value?.toLowerCase() || "";
             const filtered = window.allPatients.filter(p => 
                 (p.name?.toLowerCase().includes(q)) || 
                 (p.phone?.includes(q)) ||
@@ -576,6 +592,7 @@
             if (id !== 'scan') await stopScanner();
             document.querySelectorAll('.view-content').forEach(v => v.classList.add('hidden'));
             document.getElementById(`view-${id}`)?.classList.remove('hidden');
+            
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('nav-active'));
             document.getElementById(`nav-${id}`)?.classList.add('nav-active');
 
@@ -629,15 +646,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="glass rounded-[2.5rem] p-8 border border-white/5">
-                                <div class="flex justify-between items-center py-4 border-b border-white/5">
-                                    <span class="text-slate-500 text-[10px] font-black uppercase">Mobile Number</span>
-                                    <span class="font-black text-slate-200 font-mono">${p.phone}</span>
-                                </div>
-                                <div class="mt-6 p-6 bg-amber-500/5 rounded-[2rem] border border-amber-500/10 text-xs font-bold text-amber-500/80 leading-relaxed italic">
-                                    "${p.notes || 'لا يوجد ملاحظات طبية سابقة مسجلة لهذا المريض.'}"
-                                </div>
-                            </div>
                         </div>
                         <div class="lg:col-span-8 space-y-8">
                             <div class="glass rounded-[3.5rem] p-8 lg:p-12 border border-white/10 shadow-2xl">
@@ -685,14 +693,9 @@
             try {
                 if (!window.qrScanner) window.qrScanner = new Html5Qrcode("reader");
                 if (window.qrScanner.getState() === 1) { 
-                    // استخدام إعدادات محسنّة لضمان ملء الإطار
                     await window.qrScanner.start(
                         { facingMode: "environment" }, 
-                        { 
-                            fps: 25, 
-                            qrbox: { width: 250, height: 250 },
-                            aspectRatio: 1.0 
-                        }, 
+                        { fps: 25, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, 
                         async (txt) => { await stopScanner(); await viewPatient(txt); }, 
                         () => {}
                     );
@@ -771,8 +774,9 @@
 
         window.onload = () => {
             lucide.createIcons();
-            // تفعيل ضغط Enter للدخول
-            document.getElementById('adminPassword').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAdminAuth(); });
+            document.getElementById('adminPassword').addEventListener('keypress', (e) => { 
+                if (e.key === 'Enter') checkAdminAuth(); 
+            });
         };
     </script>
 </body>
